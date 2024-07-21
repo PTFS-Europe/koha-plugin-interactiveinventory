@@ -1,0 +1,30 @@
+
+
+
+[% INCLUDE 'doc-head-open.inc' %]
+   <script type="text/javascript">window.plugin_path="[% PLUGIN_PATH %]"</script>
+   <meta data-n-head="1" charset="utf-8">
+   <meta data-n-head="1" name="viewport" content="width=device-width,initial-scale=1">
+
+   <link rel="preload" href="/api/v1/contrib/interactiveinventory/static/dist/interactiveinventory.js" as="script">
+  [% INCLUDE 'doc-head-close.inc' %]
+  
+  <body>
+  [% INCLUDE 'header.inc' %]
+  [% INCLUDE 'cat-search.inc' %]
+
+  [%- USE Koha -%]
+  [%- USE raw -%]
+
+  <div id="__app"></div> // This will be used to hook your Vue app
+
+  <script>
+    window.csrf_token = "[% Koha.GenerateCSRF | $raw %]";
+    window.itemtypes = [% itemtypes_json | html %];
+  </script>
+
+<script type="text/javascript" src="/api/v1/contrib/interactiveinventory/static/dist/interactiveinventory.js"></script>
+
+[% INCLUDE 'intranet-bottom.inc' %]
+
+
