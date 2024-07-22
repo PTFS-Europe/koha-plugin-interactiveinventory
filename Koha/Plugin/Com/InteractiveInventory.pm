@@ -15,6 +15,7 @@ use Mojo::JSON qw(decode_json);
 use C4::Auth   qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Items  qw( GetItemsForInventory );
+use Koha::Items;
 use Koha::ItemTypes;
 
 our $VERSION = 0.0;
@@ -110,13 +111,15 @@ sub lookup_item_by_barcode {
     my ($barcode) = @_;
     warn "Looking up item data for barcode: $barcode";
 
-    # Dummy data for demonstration purposes
-    my $item_data = {};
+    my $item = Koha::Items->find( { barcode => $barcode } );
 
-    # Ensure $item_data is a hash reference
-    unless ( ref $item_data eq 'HASH' ) {
-        die "Expected a hash reference but got: " . ref($item_data);
-    }
+    my $item_data = $item->{_result}->{_column_data};
+    warn Dumper($item_data);
+
+    # # Ensure $item_data is a hash reference
+    # unless ( ref $item_data eq 'HASH' ) {
+    #     die "Expected a hash reference but got: " . ref($item_data);
+    # }
 
     return $item_data;
 }

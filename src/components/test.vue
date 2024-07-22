@@ -14,8 +14,8 @@
         <button type="submit">Submit</button>
       </form>
       <div id="inventory_results">
-        <div v-for="item in items" :key="item.barcode">
-          <p>{{ item.title }} - {{ item.status }}</p>
+        <div v-for="item in items" :key="item['barcode']">
+          <p>{{ item['barcode'] }} - {{ item['itemlost'] }}</p>
         </div>
       </div>
     </div>
@@ -76,7 +76,7 @@ export default {
           throw new Error('Network response was not ok')
         }
         const data = await response.json()
-        this.items.push(data)
+        this.items.unshift(data)
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error)
       }
