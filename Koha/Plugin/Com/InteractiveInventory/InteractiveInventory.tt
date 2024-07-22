@@ -20,7 +20,6 @@
 
   <script>
     window.csrf_token = "[% Koha.GenerateCSRF | $raw %]";
-    window.itemtypes = [% itemtypes_json | html %];
   </script>
 
 <script type="text/javascript" src="/api/v1/contrib/interactiveinventory/static/dist/interactiveinventory.js"></script>
