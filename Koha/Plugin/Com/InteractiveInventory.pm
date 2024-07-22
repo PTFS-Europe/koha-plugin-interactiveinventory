@@ -146,26 +146,27 @@ sub start_session {
     warn Dumper($datelastseen);
     warn Dumper($ccode);
 
-    my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
-        {
-            minlocation  => $minlocation,
-            maxlocation  => $maxlocation,
-            location     => $location,
-            ignoreissued => 0,
-            datelastseen => $datelastseen,
-            branchcode   => $branchcode,
-            branch       => 'CPL',
-            offset       => 0,
-            size         => 1,
-            statushash   => 0,
-            itemtypes    => \@itemsarray,
-        }
-    );
-    warn Dumper($location_data);
-    warn Dumper($iTotalRecords);
+    # my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
+    #     {
+    #         minlocation  => $minlocation,
+    #         maxlocation  => $maxlocation,
+    #         location     => $location,
+    #         ignoreissued => 0,
+    #         datelastseen => $datelastseen,
+    #         branchcode   => $branchcode,
+    #         branch       => 'CPL',
+    #         offset       => 0,
+    #         size         => 1,
+    #         statushash   => 0,
+    #         itemtypes    => \@itemsarray,
+    #     }
+    # );
+    # warn Dumper($location_data);
+    # warn Dumper($iTotalRecords);
 
-    return $location_data;
+    # return $location_data;
 
+    return $session_data;
 }
 
 =head3
