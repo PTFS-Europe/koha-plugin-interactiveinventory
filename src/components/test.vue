@@ -69,15 +69,48 @@ export default {
         const biblioData = biblioText ? JSON.parse(biblioText) : {};
         window.biblioData = biblioData;
         console.log('Biblio data:', biblioData)
-
+        
         // Combine item data and biblio data
         const combinedData = { ...itemData, biblio: biblioData };
+
+        // Check if the item is marked as lost and update its status
+        if (combinedData.lost_status != "0") {
+          await this.updateItemStatus(combinedData.external_id);
+          combinedData.wasLost = true; // Flag the item as previously lost
+        }
+
         window.combinedData = combinedData;
 
         // Prepend the combined data to the items array
         this.items.unshift(combinedData);
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error)
+      }
+    },
+    async updateItemStatus(barcode) {
+      try {
+        const response = await fetch(
+          '/api/v1/contrib/interactiveinventory/item/fields',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              barcode: barcode,
+              fields: {
+                itemlost: '0'
+              }
+            })
+          }
+        )
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        const data = await response.json();
+        console.log('Item status updated:', data);
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
       }
     },
     async initiateInventorySession(sessionData) {
