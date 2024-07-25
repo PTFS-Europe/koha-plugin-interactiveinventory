@@ -1,0 +1,67 @@
+{
+  "/item/fields": {
+    "post": {
+      "x-mojo-to": "Com::InteractiveInventory::Controllers::Items#modifyItemFields",
+      "operationId": "modifyItemFields",
+      "tags": [
+        "inventory"
+      ],
+      "produces": [
+        "application/json"
+      ],
+      "consumes": [
+        "application/json"
+      ],
+      "parameters": [
+        {
+          "name": "item",
+          "in": "body",
+          "required": true,
+          "description": "Item fields modification data",
+          "schema": {
+            "type": "object",
+            "required": [
+              "barcode",
+              "fields"
+            ],
+            "properties": {
+              "barcode": {
+                "type": "string",
+                "description": "The barcode of the item to modify"
+              },
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "The fields to update with their new values"
+              }
+            }
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Item updated successfully",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Missing barcode or fields to update"
+        },
+        "404": {
+          "description": "Item not found"
+        }
+      }
+    }
+  }
+}
