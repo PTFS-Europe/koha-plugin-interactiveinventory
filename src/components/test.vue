@@ -1,16 +1,19 @@
 <template>
-  <div>
+  <div class="container">
     <InventorySetupForm @start-session="initiateInventorySession" v-if="!sessionStarted" />
     <div v-else>
-      <form @submit.prevent="submitBarcode">
+      <form @submit.prevent="submitBarcode" class="barcode-form">
         <label for="barcode_input">Scan Barcode:</label>
-        <input type="text" v-model="barcode" id="barcode_input" />
+        <input type="text" v-model="barcode" id="barcode_input" ref="barcodeInput" />
         <button type="submit">Submit</button>
       </form>
-      <div id="inventory_results">
-        <div v-for="item in items" :key="item.external_id">
-          <p>{{ item.biblio.title }} - {{ item.external_id }}</p>
-        </div>
+      <div id="inventory_results" class="items-list">
+        <InventoryItem
+          v-for="(item, index) in items"
+          :key="item.external_id"
+          :item="item"
+          :isInitiallyExpanded="index === 0"
+        />
       </div>
     </div>
   </div>
@@ -18,10 +21,12 @@
 
 <script>
 import InventorySetupForm from './InventorySetupForm.vue'
+import InventoryItem from './InventoryItem.vue'
 
 export default {
   components: {
-    InventorySetupForm
+    InventorySetupForm,
+    InventoryItem
   },
   data() {
     return {
@@ -39,9 +44,9 @@ export default {
           `/api/v1/items?external_id=${encodeURIComponent(this.barcode)}`,
           {
             method: 'GET',
-            // headers: {
-            //   'Content-Type': 'application/json'
-            // }
+            headers: {
+              'Accept': 'application/json'
+            }
           }
         )
         if (!itemResponse.ok) {
@@ -65,7 +70,7 @@ export default {
         if (!biblioResponse.ok) {
           throw new Error('Network response was not ok')
         }
-       const biblioText = await biblioResponse.text();
+        const biblioText = await biblioResponse.text();
         const biblioData = biblioText ? JSON.parse(biblioText) : {};
         window.biblioData = biblioData;
         console.log('Biblio data:', biblioData)
@@ -83,6 +88,16 @@ export default {
 
         // Prepend the combined data to the items array
         this.items.unshift(combinedData);
+
+        // Set all items to be collapsed
+        this.items = this.items.map(item => ({
+          ...item,
+          isExpanded: false
+        }));
+
+        // Clear the barcode input and focus on it
+        this.barcode = '';
+        this.$refs.barcodeInput.focus();
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error)
       }
@@ -140,7 +155,45 @@ export default {
 </script>
 
 <style scoped>
-form {
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.barcode-form {
   display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.barcode-form label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.barcode-form input {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.barcode-form button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.barcode-form button:hover {
+  background-color: #0056b3;
+}
+
+.items-list {
+  margin-top: 20px;
 }
 </style>
