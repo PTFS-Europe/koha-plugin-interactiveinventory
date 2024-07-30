@@ -49,7 +49,7 @@ export default {
     },
     fetchAuthorizedValues() {
       const cacheKey = 'authorizedValues_LOST';
-      const cachedValues = localStorage.getItem(cacheKey);
+      const cachedValues = sessionStorage.getItem(cacheKey);
 
       if (cachedValues) {
         this.authorizedValues = JSON.parse(cachedValues);
@@ -63,7 +63,7 @@ export default {
               values[item.value] = item.description;
             });
             this.authorizedValues = values;
-            localStorage.setItem(cacheKey, JSON.stringify(values));
+            sessionStorage.setItem(cacheKey, JSON.stringify(values));
             console.log('Fetched and cached authorized values:', this.authorizedValues);
           })
           .catch(error => {
