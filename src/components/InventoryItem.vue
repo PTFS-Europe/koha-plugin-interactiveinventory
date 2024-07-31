@@ -22,7 +22,11 @@ export default {
   props: {
     item: Object,
     isExpanded: Boolean,
-    index: Number
+    index: Number,
+    fetchAuthorizedValues: {
+      type: Function,
+      required: true
+    }
   },
   data() {
     return {
@@ -47,28 +51,26 @@ export default {
     toggleExpand() {
       this.$emit('toggleExpand', `${this.index}-${this.item.id}`);
     },
-    fetchAuthorizedValues() {
-      const cacheKey = 'authorizedValues_LOST';
+    async fetchAndSetAuthorizedValues(field) {
+      const cacheKey = `authorizedValues_${field}`;
       const cachedValues = sessionStorage.getItem(cacheKey);
 
       if (cachedValues) {
         this.authorizedValues = JSON.parse(cachedValues);
         console.log('Using cached authorized values:', this.authorizedValues);
       } else {
-        fetch('/api/v1/authorised_value_categories/LOST/authorised_values')
-          .then(response => response.json())
-          .then(data => {
-            const values = {};
-            data.forEach(item => {
-              values[item.value] = item.description;
-            });
-            this.authorizedValues = values;
-            sessionStorage.setItem(cacheKey, JSON.stringify(values));
-            console.log('Fetched and cached authorized values:', this.authorizedValues);
-          })
-          .catch(error => {
-            console.error('Error fetching authorized values:', error);
-          });
+        try {
+          const values = await this.fetchAuthorizedValues(field);
+          const parsedValues = values.reduce((acc, item) => {
+            acc[item.value] = item.description;
+            return acc;
+          }, {});
+          this.authorizedValues = parsedValues;
+          sessionStorage.setItem(cacheKey, JSON.stringify(parsedValues));
+          console.log('Fetched and cached authorized values:', this.authorizedValues);
+        } catch (error) {
+          console.error('Error setting authorized values:', error);
+        }
       }
     }
   },

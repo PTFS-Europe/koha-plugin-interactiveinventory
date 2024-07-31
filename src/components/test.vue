@@ -15,6 +15,7 @@
           :index="index"
           :isExpanded="item.isExpanded"
           @toggleExpand="handleToggleExpand"
+          :fetchAuthorizedValues="fetchAuthorizedValues"
         />  
       </div>
     </div>
@@ -39,6 +40,18 @@ export default {
     }
   },
   methods: {
+    async fetchAuthorizedValues(category) {
+      const response = await fetch(`/api/v1/authorised_value_categories/${category}/authorised_values`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch authorized values for ${category}`);
+      }
+      return response.json();
+    },
     async submitBarcode() {
       try {
         // Fetch item data
@@ -107,7 +120,7 @@ export default {
     async updateItemStatus(barcode) {
       try {
         const response = await fetch(
-          '/api/v1/contrib/interactiveinventory/item/fields',
+          `/api/v1/contrib/interactiveinventory/item/fields`,
           {
             method: 'POST',
             headers: {
@@ -157,6 +170,21 @@ export default {
         ...item,
         isExpanded: `${index}-${item.id}` === itemId ? !item.isExpanded : false // Toggle the clicked item, collapse others
       }));
+    },
+    fetchAuthorizedValues(field) {
+      return fetch(`/api/v1/authorised_value_categories/${field}/authorised_values`)
+        .then(response => response.json())
+        .then(data => {
+          const values = {};
+          data.forEach(item => {
+            values[item.value] = item.description;
+          });
+          return values;
+        })
+        .catch(error => {
+          console.error('Error fetching authorized values:', error);
+          throw error;
+        });
     }
   }
 }
