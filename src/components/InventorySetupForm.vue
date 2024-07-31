@@ -16,11 +16,11 @@
           <!-- Options here -->
         </select>
       </div>
-      <div>
-        <label for="ccode">Collection code:</label>
-        <select id="ccodeloop" v-model="ccode">
-          <option value="">Filter collection</option>
-          <!-- Options here -->
+      <div class="form-group">
+        <label for="collectionCode">Collection Code</label>
+        <select v-model="ccode" id="collectionCode" class="form-control">
+          <option value="" disabled>Select a collection code</option>
+          <option v-for="ccode, key in collectionCodes" :key="key" :value="key">{{ ccode }}</option>
         </select>
       </div>
       <div>
@@ -98,12 +98,14 @@ export default {
       ignoreWaitingHolds: false,
       statuses: {},
       libraries: [],
-      selectedLibraryId: ''
+      selectedLibraryId: '',
+      collectionCodes: []
     };
   },
   created() {
     this.createStatuses();
     this.fetchLibraries();
+    this.fetchCollectionCodes();
   },
   methods: {
     checkForm() {
@@ -175,7 +177,15 @@ export default {
       } catch (error) {
         console.error('Error fetching libraries:', error);
       }
-    }
+    },
+    async fetchCollectionCodes() {
+      try {
+        const collectionCodes = await this.fetchAuthorizedValues('CCODE');
+        this.collectionCodes = collectionCodes;
+      } catch (error) {
+        console.error(error);
+      }
+    },
   },
   
 };
