@@ -1,11 +1,13 @@
 <template>
 
     <form @submit.prevent="startInventorySession">
-      <div>
-        <label for="branchloop">Branch Loop:</label>
-        <select id="branchloop" v-model="branchLoop">
-          <!-- Options here -->
       <div class="form-group">
+        <label for="library">Library</label>
+        <select v-model="selectedLibraryId" id="library" class="form-control">
+          <option value="">All Libraries</option>
+          <option v-for="library in libraries" :key="library.id" :value="library.id">
+            {{ library.name }}
+          </option>
         </select>
       </div>
       <div>
@@ -85,7 +87,7 @@ export default {
       minLocation: '',
       maxLocation: '',
       classSource: '',
- selectedStatuses: {
+      selectedStatuses: {
         'items.itemlost': [],
         'items.notforloan': [],
         'items.withdrawn': [],
@@ -95,10 +97,13 @@ export default {
       ignoreIssued: false,
       ignoreWaitingHolds: false,
       statuses: {},
+      libraries: [],
+      selectedLibraryId: ''
     };
   },
   created() {
     this.createStatuses();
+    this.fetchLibraries();
   },
   methods: {
     checkForm() {
@@ -161,8 +166,18 @@ export default {
     } catch (error) {
       console.error('Error creating statuses:', error);
     }
-  } 
-  }
+  },
+  async fetchLibraries() {
+      try {
+        const response = await fetch('/api/v1/public/libraries');
+        const data = await response.json();
+        this.libraries = data;
+      } catch (error) {
+        console.error('Error fetching libraries:', error);
+      }
+    }
+  },
+  
 };
 </script>
 
@@ -198,5 +213,27 @@ button {
 
 .status-row label {
   font-weight: normal; /* Ensure labels are not bold */
+}
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 </style>
