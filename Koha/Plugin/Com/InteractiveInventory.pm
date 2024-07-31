@@ -131,6 +131,12 @@ sub start_session {
     my $session_data_encoded = $self->{cgi}->param('session_data');
     my $session_data_json    = uri_unescape($session_data_encoded);
     my $session_data         = decode_json($session_data_json);
+    my @itemtypes            = Koha::ItemTypes->search->as_list;
+    my @itemtype_codes       = map { $_->itemtype } @itemtypes;
+
+    # Quote each item type manually
+    my @quoted_itemtypes = map { "'$_'" } @itemtype_codes;
+    warn Dumper(@itemtype_codes);
 
     my $minlocation  = $session_data->{'minlocation'};
     my $maxlocation  = $session_data->{'maxlocation'};
@@ -138,10 +144,7 @@ sub start_session {
     my $branchcode   = $session_data->{'branchcode'};
     my $datelastseen = $session_data->{'datelastseen'};
     my $ccode        = $session_data->{'ccode'};
-    my $itemtypes    = $session_data->{'itemtypes'};
-    my @itemsarray   = [];
-
-    my @selected_itemtypes = map { "'$_'" } @{$itemtypes};
+    my @itemsarray   = ('BK');
 
     warn Dumper($minlocation);
     warn Dumper($maxlocation);
@@ -150,27 +153,30 @@ sub start_session {
     warn Dumper($datelastseen);
     warn Dumper($ccode);
 
-    # my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
-    #     {
-    #         minlocation  => $minlocation,
-    #         maxlocation  => $maxlocation,
-    #         location     => $location,
-    #         ignoreissued => 0,
-    #         datelastseen => $datelastseen,
-    #         branchcode   => $branchcode,
-    #         branch       => 'CPL',
-    #         offset       => 0,
-    #         size         => 1,
-    #         statushash   => 0,
-    #         itemtypes    => \@itemsarray,
-    #     }
-    # );
-    # warn Dumper($location_data);
-    # warn Dumper($iTotalRecords);
+    my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
+        {
+            minlocation  => $minlocation,
+            maxlocation  => $maxlocation,
+            location     => $location,
+            ignoreissued => 0,
+            datelastseen => $datelastseen,
+            branchcode   => $branchcode,
+            branch       => 'CPL',
+            offset       => 0,
+            size         => 1,
+            statushash   => 0,
+            itemtypes    => \@quoted_itemtypes,
+        }
+    );
 
-    # return $location_data;
+    # Combine location_data and iTotalRecords into an array
+    my @combined_data = ( $location_data, $iTotalRecords );
 
-    return $session_data;
+    # Encode the array as JSON
+    my $json_output = encode_json( \@combined_data );
+
+    # Print the JSON-encoded array
+    print $json_output;
 }
 
 =head3
