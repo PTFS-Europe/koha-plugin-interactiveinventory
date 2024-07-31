@@ -1,61 +1,172 @@
 <template>
-  <div>
+
     <form @submit.prevent="startInventorySession">
-      <label for="minlocation">Min Location:</label>
-      <input type="text" v-model="minlocation" id="minlocation" required />
-
-      <label for="maxlocation">Max Location:</label>
-      <input type="text" v-model="maxlocation" id="maxlocation" required />
-
-      <label for="location">Location:</label>
-      <input type="text" v-model="location" id="location" required />
-
-      <label for="branchcode">Branch Code:</label>
-      <input type="text" v-model="branchcode" id="branchcode" required />
-
-      <label for="datelastseen">Date Last Seen:</label>
-      <input type="date" v-model="datelastseen" id="datelastseen" required />
-
-      <label for="ccode">Collection Code:</label>
-      <input type="text" v-model="ccode" id="ccode" required />
-
-      <label for="itemtypes">Item Types:</label>
-      <input type="text" v-model="itemtypes" id="itemtypes" required />
-
-      <button type="submit">Start Inventory Session</button>
+      <div>
+        <label for="branchloop">Branch Loop:</label>
+        <select id="branchloop" v-model="branchLoop">
+          <!-- Options here -->
+      <div class="form-group">
+        </select>
+      </div>
+      <div>
+        <label for="locationloop">Location Loop:</label>
+        <select id="locationloop" v-model="locationLoop">
+          <!-- Options here -->
+        </select>
+      </div>
+      <div>
+        <label for="ccode">Collection code:</label>
+        <select id="ccodeloop" v-model="ccode">
+          <option value="">Filter collection</option>
+          <!-- Options here -->
+        </select>
+      </div>
+      <div>
+        <label for="minlocation">Item call number between:</label>
+        <input type="text" id="minlocation" v-model="minLocation" /> (items.itemcallnumber)
+      </div>
+      <div>
+        <label for="maxlocation">...and:</label>
+        <input type="text" id="maxlocation" v-model="maxLocation" />
+      </div>
+      <div>
+        <label for="class_source">Call number classification scheme:</label>
+        <select id="class_source" v-model="classSource">
+          <!-- Options here -->
+        </select>
+      </div>
+      <fieldset class="rows" id="optionalfilters">
+        <legend>Optional filters for inventory list or comparing barcodes</legend>
+        <span class="hint">Scanned items are expected to match one of the selected "not for loan" criteria if any are checked.</span>
+        <br/>
+        <div id="statuses" class="statuses-grid">
+          <div v-for="(statusList, statusKey) in statuses" :key="statusKey" class="status-column">
+            <label :for="statusKey">{{ statusKey }}:</label>
+            <div v-for="status in statusList" :key="statusKey + '-' + status.authorised_value_id" class="status-row">
+              <input type="checkbox" :id="statusKey + '-' + status.authorised_value_id" :value="status.authorised_value_id" v-model="selectedStatuses[statusKey]" />
+              <label :for="statusKey + '-' + status.authorised_value_id">{{ status.description }}</label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+      <ol>
+        <li>
+          <br/>
+          <label for="datelastseen">Last inventory date:</label>
+          <input type="text" id="datelastseen" v-model="dateLastSeen" class="flatpickr" />
+          (Skip records marked as seen on or after this date.)
+        </li>
+        <li>
+          <label for="ignoreissued">Skip items on loan: </label>
+          <input type="checkbox" id="ignoreissued" v-model="ignoreIssued" />
+        </li>
+        <li>
+          <label for="ignore_waiting_holds">Skip items on hold awaiting pickup: </label>
+          <input type="checkbox" id="ignore_waiting_holds" v-model="ignoreWaitingHolds" />
+        </li>
+      </ol>
+      <button type="submit">Submit</button>
     </form>
-  </div>
 </template>
 
 <script>
 export default {
+  props: {
+    fetchAuthorizedValues: {
+      type: Function,
+      required: true
+    } 
+  },
   data() {
     return {
-      minlocation: '',
-      maxlocation: '',
-      location: '',
-      branchcode: '',
-      datelastseen: '',
+      branchLoop: '',
+      locationLoop: '',
       ccode: '',
-      itemtypes: ''
-    }
+      minLocation: '',
+      maxLocation: '',
+      classSource: '',
+ selectedStatuses: {
+        'items.itemlost': [],
+        'items.notforloan': [],
+        'items.withdrawn': [],
+        'items.damaged': []
+      },
+      dateLastSeen: '',
+      ignoreIssued: false,
+      ignoreWaitingHolds: false,
+      statuses: {},
+    };
+  },
+  created() {
+    this.createStatuses();
   },
   methods: {
+    checkForm() {
+      if (!(this.branchLoop || this.locationLoop || this.ccode || this.minLocation || this.maxLocation || this.classSource || this.selectedStatuses.length)) {
+        return confirm(
+          "You have not selected any catalog filters and are about to compare a file of barcodes to your entire catalog.\n\n" +
+          "For large catalogs this can result in unexpected behavior\n\n" +
+          "Are you sure you want to do this?"
+        );
+      }
+      return true;
+    },
     startInventorySession() {
       // Pass the values to the inventory script
       this.$emit('start-session', {
-        minlocation: this.minlocation,
-        maxlocation: this.maxlocation,
-        location: this.location,
-        branchcode: this.branchcode,
-        datelastseen: this.datelastseen,
+        minLocation: this.minLocation,
+        maxLocation: this.maxLocation,
+        locationLoop: this.locationLoop,
+        branchLoop: this.branchLoop,
+        dateLastSeen: this.dateLastSeen,
         ccode: this.ccode,
-        itemtypes: this.itemtypes
-      })
+        classSource: this.classSource,
+        selectedStatuses: this.selectedStatuses,
+        ignoreIssued: this.ignoreIssued,
+        ignoreWaitingHolds: this.ignoreWaitingHolds
+      });
+    },
+    async createStatuses() {
+    try {
+      const statusFields = {
+        'items.itemlost': 'LOST',
+        'items.notforloan': 'NOT_LOAN',
+        'items.withdrawn': 'WITHDRAWN',
+        'items.damaged': 'DAMAGED'
+      };
+
+      const statusPromises = Object.values(statusFields).map(field => this.fetchAuthorizedValues(field));
+      const statusResults = await Promise.all(statusPromises);
+
+      Object.keys(statusFields).forEach((key, index) => {
+        let result = statusResults[index];
+        if (result && typeof result === 'object' && !Array.isArray(result)) {
+          result = Object.keys(result).map(k => ({
+            value: k,
+            description: result[k]
+          }));
+        }
+
+        if (Array.isArray(result)) {
+          this.statuses[key] = result.map(item => ({
+            authorised_value_id: item.value,
+            description: item.description
+          }));
+        } else {
+          console.error(`Unexpected result format for ${statusFields[key]}:`, result);
+        }
+      });
+
+      console.log('Statuses:', this.statuses);
+    } catch (error) {
+      console.error('Error creating statuses:', error);
     }
+  } 
   }
-}
+};
 </script>
+
+
 
 <style scoped>
 form {
@@ -67,5 +178,25 @@ label {
 }
 button {
   margin-top: 20px;
+}
+.statuses-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Ensure all columns fit in one row */
+  gap: 16px;
+}
+
+.status-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.status-row label {
+  font-weight: normal; /* Ensure labels are not bold */
 }
 </style>

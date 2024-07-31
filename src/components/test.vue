@@ -1,6 +1,9 @@
 <template>
   <div class="container">
-    <InventorySetupForm @start-session="initiateInventorySession" v-if="!sessionStarted" />
+    <InventorySetupForm 
+      @start-session="initiateInventorySession" 
+      :fetchAuthorizedValues="fetchAuthorizedValues"
+      v-if="!sessionStarted" />
     <div v-else>
       <form @submit.prevent="submitBarcode" class="barcode-form">
         <label for="barcode_input">Scan Barcode:</label>
@@ -36,8 +39,8 @@ export default {
       barcode: '',
       items: [],
       sessionData: null,
-      sessionStarted: false
-    }
+      sessionStarted: false,
+    };
   },
   methods: {
     async fetchAuthorizedValues(category) {
@@ -53,6 +56,7 @@ export default {
       const data = await response.json();
       return data;
     },
+    
     async submitBarcode() {
       try {
         // Fetch item data
