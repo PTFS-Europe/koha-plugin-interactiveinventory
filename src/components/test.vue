@@ -50,7 +50,8 @@ export default {
       if (!response.ok) {
         throw new Error(`Failed to fetch authorized values for ${category}`);
       }
-      return response.json();
+      const data = await response.json();
+      return data;
     },
     async submitBarcode() {
       try {

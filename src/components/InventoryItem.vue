@@ -33,6 +33,9 @@ export default {
       authorizedValues: {}
     };
   },
+  created() {
+    this.fetchAndSetAuthorizedValues('LOST');
+  },
   computed: {
     constructedUrl() {
       const biblionumber = this.item.biblio_id;
@@ -61,22 +64,18 @@ export default {
       } else {
         try {
           const values = await this.fetchAuthorizedValues(field);
-          const parsedValues = values.reduce((acc, item) => {
-            acc[item.value] = item.description;
-            return acc;
-          }, {});
-          this.authorizedValues = parsedValues;
-          sessionStorage.setItem(cacheKey, JSON.stringify(parsedValues));
+          console.log('Fetched values:', values);
+
+          // Directly use the values object
+          this.authorizedValues = values;
+          sessionStorage.setItem(cacheKey, JSON.stringify(values));
           console.log('Fetched and cached authorized values:', this.authorizedValues);
         } catch (error) {
           console.error('Error setting authorized values:', error);
         }
       }
-    }
+    },
   },
-  created() {
-    this.fetchAuthorizedValues();
-  }
 }
 </script>
 
