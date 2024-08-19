@@ -57,6 +57,14 @@ sub tool {
             flagsrequired => { tools => 'inventory' },
         }
     );
+    my @class_sources = Koha::ClassSources->search( { used => 1 } )->as_list;
+    my $pref_class    = C4::Context->preference("DefaultClassificationSource");
+
+    # Pass @class_sources to the template
+    $template->param(
+        class_sources => \@class_sources,
+        pref_class    => $pref_class,
+    );
 
     output_html_with_http_headers $cgi, $cookie, $template->output;
 }

@@ -20,6 +20,14 @@
 
   <script>
     window.csrf_token = "[% Koha.GenerateCSRF | $raw %]";
+    window.class_sources = {
+      [% FOREACH class_source IN class_sources %]
+        "[% class_source.cn_source | html %]": {
+          "description": "[% class_source.description | html %]",
+          "default": [% IF class_source.cn_source == pref_class %]1[% ELSE %]0[% END %]
+        }[% IF !loop.last %],[% END %]
+      [% END %]
+    }
   </script>
 
 <script type="text/javascript" src="/api/v1/contrib/interactiveinventory/static/dist/interactiveinventory.js"></script>

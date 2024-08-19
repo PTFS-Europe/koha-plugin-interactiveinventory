@@ -32,11 +32,11 @@
         <input type="text" id="maxlocation" v-model="maxLocation" />
       </div>
       <div>
-        <label for="class_source">Call number classification scheme:</label>
-        <select id="class_source" v-model="classSource">
-          <!-- Options here -->
-        </select>
-      </div>
+      <label for="class_source">Call number classification scheme:</label>
+    <select id="class_source" v-model="classSource">
+      <option v-for="(source, key) in classSources" :key="key" :value="key">{{ source.description }}</option>
+    </select>
+  </div>
       <fieldset class="rows" id="optionalfilters">
         <legend>Optional filters for inventory list or comparing barcodes</legend>
         <span class="hint">Scanned items are expected to match one of the selected "not for loan" criteria if any are checked.</span>
@@ -53,7 +53,6 @@
       </fieldset>
       <ol>
         <li>
-          <br/>
           <label for="datelastseen">Last inventory date:</label>
           <input type="text" id="datelastseen" v-model="dateLastSeen" class="flatpickr" />
           (Skip records marked as seen on or after this date.)
@@ -77,16 +76,18 @@ export default {
     fetchAuthorizedValues: {
       type: Function,
       required: true
-    } 
+    },
   },
   data() {
+    const classSources = window.class_sources || {};
+    const defaultClassSource = Object.keys(classSources).find(key => classSources[key].default === 1) || '';
     return {
       branchLoop: '',
       locationLoop: '',
       ccode: '',
       minLocation: '',
       maxLocation: '',
-      classSource: '',
+      classSource: defaultClassSource,
       selectedStatuses: {
         'items.itemlost': [],
         'items.notforloan': [],
@@ -99,7 +100,8 @@ export default {
       statuses: {},
       libraries: [],
       selectedLibraryId: '',
-      collectionCodes: []
+      collectionCodes: [],
+      classSources: window.class_sources, 
     };
   },
   created() {
