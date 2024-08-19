@@ -66,6 +66,15 @@
           <input type="checkbox" id="ignore_waiting_holds" v-model="ignoreWaitingHolds" />
         </li>
       </ol>
+        <div class="item-types-container">
+          <label>Item Types</label>
+          <div class="item-types-grid">
+            <div v-for="iType in iTypes" :key="iType.item_type_id" class="item-type-box" @click="toggleItype(iType.item_type_id)">
+              <input type="checkbox" :id="'iType_' + iType.item_type_id" :value="iType.item_type_id" v-model="selectedItypes" @click.stop />
+              <label :for="'iType_' + iType.item_type_id">{{ iType.description }}</label>
+            </div>
+          </div>
+        </div>
       <button type="submit">Submit</button>
     </form>
 </template>
@@ -102,12 +111,15 @@ export default {
       selectedLibraryId: '',
       collectionCodes: [],
       classSources: window.class_sources, 
+      iTypes: [],
+      selectedItypes: [],
     };
   },
   created() {
     this.createStatuses();
     this.fetchLibraries();
     this.fetchCollectionCodes();
+    this.fetchItemTypes();
   },
   methods: {
     checkForm() {
@@ -132,7 +144,8 @@ export default {
         classSource: this.classSource,
         selectedStatuses: this.selectedStatuses,
         ignoreIssued: this.ignoreIssued,
-        ignoreWaitingHolds: this.ignoreWaitingHolds
+        ignoreWaitingHolds: this.ignoreWaitingHolds,
+        selectedItypes: this.selectedItypes,
       });
     },
     async createStatuses() {
@@ -180,12 +193,29 @@ export default {
         console.error('Error fetching libraries:', error);
       }
     },
+    async fetchItemTypes() {
+      try {
+        const response = await fetch('/api/v1/item_types');
+        const data = await response.json();
+        this.iTypes = data;
+      } catch (error) {
+        console.error('Error fetching itemTypes:', error);
+      }
+    },
     async fetchCollectionCodes() {
       try {
         const collectionCodes = await this.fetchAuthorizedValues('CCODE');
         this.collectionCodes = collectionCodes;
       } catch (error) {
         console.error(error);
+      }
+    },
+    toggleItype(itemTypeId) {
+      const index = this.selectedItypes.indexOf(itemTypeId);
+      if (index > -1) {
+        this.selectedItypes.splice(index, 1);
+      } else {
+        this.selectedItypes.push(itemTypeId);
       }
     },
   },
@@ -247,5 +277,34 @@ button {
   border-color: #80bdff;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+.item-types-container {
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  padding: 15px;
+  background-color: #fff;
+  margin-top: 10px;
+}
+
+.item-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.item-type-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.item-type-box input {
+  margin-right: 10px;
+}
+
+.item-type-box:hover {
+  background-color: #f0f0f0;
 }
 </style>
