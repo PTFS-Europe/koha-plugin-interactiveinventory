@@ -21,6 +21,7 @@
           :fetchAuthorizedValues="fetchAuthorizedValues"
         />  
       </div>
+      <button @click="exportToCSV">Export to CSV</button>
     </div>
   </div>
 </template>
@@ -190,6 +191,42 @@ export default {
           console.error('Error fetching authorized values:', error);
           throw error;
         });
+    },
+    exportToCSV() {
+      const headers = [
+        'Item_ID', 'Biblio_ID', 'Title', 'Author', 'Publication Year', 
+        'Publisher', 'ISBN', 'Pages', 'Location', 'Acquisition Date', 'Last Seen Date', 'URL', 'Was Lost', 'Lost Reason'
+      ];
+
+      const csvContent = [
+        headers.join(','),
+        ...this.items.map(item => {
+          return [
+            `"${item.item_id}"`,
+            `"${item.biblio_id}"`,
+            `"${item.biblio.title}"`,
+            `"${item.biblio.author || 'N/A'}"`,
+            `"${item.biblio.publication_year || 'N/A'}"`,
+            `"${item.biblio.publisher || 'N/A'}"`,
+            `"${item.biblio.isbn || 'N/A'}"`,
+            `"${item.biblio.pages || 'N/A'}"`,
+            `"${item.location}"`,
+            `"${item.acquisition_date}"`,
+            `"${item.last_seen_date}"`,
+            `"${window.location.origin}/cgi-bin/koha/catalogue/detail.pl?biblionumber=${item.biblio_id}"`,
+            `"${item.wasLost ? 'Yes' : 'No'}"`,
+            `"${item.wasLost ? item.lostReason : 'N/A'}"`
+          ].join(',');
+        })
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'inventory.csv';
+      a.click();
+      URL.revokeObjectURL(url);
     }
   }
 }
