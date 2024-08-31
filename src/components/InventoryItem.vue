@@ -15,7 +15,7 @@
       <p><strong>Location:</strong> {{ item.location }}</p>
       <p><strong>Acquisition Date:</strong> {{ item.acquisition_date }}</p>
       <p><strong>Last Seen Date:</strong> {{ item.last_seen_date }}</p>
-      <p><strong>URL:</strong> <a :href="constructedUrl" target="_blank">{{ constructedUrl }}</a></p>
+      <p><strong>URL:</strong> <a :href="constructedUrl" target="_blank" @click.stop>{{ constructedUrl }}</a></p>
       <p v-if="item.wasLost" class="lost-item-warning"><strong>Warning:</strong> This item was previously marked as lost. Reason: {{ lostReason }}</p>
     </div>
   </div>
