@@ -16,7 +16,7 @@
   [%- USE Koha -%]
   [%- USE raw -%]
 
-  <div id="__app"></div> // This will be used to hook your Vue app
+  <div id="__app"></div> 
 
   <script>
     window.csrf_token = "[% Koha.GenerateCSRF | $raw %]";
