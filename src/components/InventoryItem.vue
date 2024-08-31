@@ -1,6 +1,10 @@
 <template>
   <div :class="['item', { 'highlight': item.wasLost }]" @click="toggleExpand">
-    <p class="item-title">{{ item.biblio.title }} - {{ item.external_id }}</p>
+    <p class="item-title">
+      <span :class="issueIconClass" aria-hidden="true">{{ issueIcon }}</span>
+      <span class="sr-only">{{ issueIconText }}</span>
+      {{ item.biblio.title }} - {{ item.external_id }}
+    </p>
     <div v-if="isExpanded" class="item-details">
       <p><strong>Title:</strong> {{ item.biblio.title }}</p>
       <p><strong>Author:</strong> {{ item.biblio.author || 'N/A' }}</p>
@@ -37,6 +41,15 @@ export default {
     this.fetchAndSetAuthorizedValues('LOST');
   },
   computed: {
+    issueIcon() {
+      return this.item.wasLost ? '✖' : '✔';
+    },
+    issueIconClass() {
+      return this.item.wasLost ? 'text-danger' : 'text-success';
+    },
+    issueIconText() {
+      return this.item.wasLost ? 'Item has issues' : 'Item has no issues';
+    },
     constructedUrl() {
       const biblionumber = this.item.biblio_id;
       return `${window.location.origin}/cgi-bin/koha/catalogue/detail.pl?biblionumber=${biblionumber}`;
