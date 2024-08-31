@@ -1,6 +1,27 @@
 <template>
 
     <form @submit.prevent="startInventorySession">
+      <div class="section-container">
+        <h2>Parameters</h2>
+        <div>
+          <label for="inventoryDate">Set inventory date to:</label>
+          <input type="date" id="inventoryDate" v-model="inventoryDate" />
+        </div>
+        <div>
+          <label for="compareBarcodes">Compare barcodes list to results:</label>
+          <input type="checkbox" id="compareBarcodes" v-model="compareBarcodes" />
+        </div>
+        <div>
+          <label for="doNotCheckIn">Do not check in items scanned during inventory:</label>
+          <input type="checkbox" id="doNotCheckIn" v-model="doNotCheckIn" />
+        </div>
+        <div>
+          <label for="checkShelvedOutOfOrder">Check barcodes list for items shelved out of order:</label>
+          <input type="checkbox" id="checkShelvedOutOfOrder" v-model="checkShelvedOutOfOrder" />
+        </div>
+      </div>
+      <div class="section-container">
+        <h2>Item Location Filters</h2>
       <div class="form-group">
         <label for="library">Library</label>
         <select v-model="selectedLibraryId" id="library" class="form-control">
@@ -37,8 +58,11 @@
       <option v-for="(source, key) in classSources" :key="key" :value="key">{{ source.description }}</option>
     </select>
   </div>
-      <fieldset class="rows" id="optionalfilters">
+</div>
+<div class="section-container">
+      <fieldset id="optionalfilters">
         <legend>Optional filters for inventory list or comparing barcodes</legend>
+        <div class="form-group">
         <span class="hint">Scanned items are expected to match one of the selected "not for loan" criteria if any are checked.</span>
         <br/>
         <div id="statuses" class="statuses-grid">
@@ -50,11 +74,12 @@
             </div>
           </div>
         </div>
+      </div>
       </fieldset>
       <ol>
         <li>
           <label for="datelastseen">Last inventory date:</label>
-          <input type="text" id="datelastseen" v-model="dateLastSeen" class="flatpickr" />
+          <input type="date" id="datelastseen" v-model="dateLastSeen" class="flatpickr" />
           (Skip records marked as seen on or after this date.)
         </li>
         <li>
@@ -66,7 +91,7 @@
           <input type="checkbox" id="ignore_waiting_holds" v-model="ignoreWaitingHolds" />
         </li>
       </ol>
-        <div class="item-types-container">
+      <div class="form-group">
           <label>Item Types</label>
           <div class="item-types-grid">
             <div v-for="iType in iTypes" :key="iType.item_type_id" class="item-type-box" @click="toggleItype(iType.item_type_id)">
@@ -75,6 +100,7 @@
             </div>
           </div>
         </div>
+      </div>
       <button type="submit">Submit</button>
     </form>
 </template>
@@ -278,7 +304,7 @@ button {
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
-.item-types-container {
+.section-container {
   border: 1px solid #ced4da;
   border-radius: 0.25rem;
   padding: 15px;
