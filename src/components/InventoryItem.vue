@@ -1,5 +1,5 @@
 <template>
-  <div :class="['item', { 'highlight': item.wasLost }]" @click="toggleExpand">
+  <div :class="['item', { 'highlight': hasIssue }]" @click="toggleExpand">
     <p class="item-title">
       <span :class="issueIconClass" aria-hidden="true">{{ issueIcon }}</span>
       <span class="sr-only">{{ issueIconText }}</span>
@@ -16,7 +16,9 @@
       <p><strong>Acquisition Date:</strong> {{ item.acquisition_date }}</p>
       <p><strong>Last Seen Date:</strong> {{ item.last_seen_date }}</p>
       <p><strong>URL:</strong> <a :href="constructedUrl" target="_blank" @click.stop>{{ constructedUrl }}</a></p>
-      <p v-if="item.wasLost" class="lost-item-warning"><strong>Warning:</strong> This item was previously marked as lost. Reason: {{ lostReason }}</p>
+      <p v-if="item.wasLost" class="item-warning"><strong>Warning:</strong> This item was previously marked as lost. Reason: {{ lostReason }}</p>
+      <p v-if="item.wrongPlace" class="item-warning"><strong>Warning:</strong> This item is in the wrong place, please move it!</p>
+      <p v-if="item.checked_out_date" class="item-warning"><strong>Warning:</strong> This item was checked out on: {{ item.checked_out_date }} and has not been checked in.</p>
     </div>
   </div>
 </template>
@@ -41,14 +43,17 @@ export default {
     this.fetchAndSetAuthorizedValues('LOST');
   },
   computed: {
+    hasIssue() {
+      return this.item.wasLost || this.item.wrongPlace || this.item.checked_out_date;
+    },
     issueIcon() {
-      return this.item.wasLost ? '✖' : '✔';
+      return this.hasIssue ? '✖' : '✔';
     },
     issueIconClass() {
-      return this.item.wasLost ? 'text-danger' : 'text-success';
+      return this.hasIssue ? 'text-danger' : 'text-success';
     },
     issueIconText() {
-      return this.item.wasLost ? 'Item has issues' : 'Item has no issues';
+      return this.hasIssue ? 'Item has issues' : 'Item has no issues';
     },
     constructedUrl() {
       const biblionumber = this.item.biblio_id;
@@ -141,7 +146,7 @@ export default {
   border-color: #ff6f61;
 }
 
-.lost-item-warning {
+.item-warning {
   color: #ff6f61;
   font-weight: bold;
 }
