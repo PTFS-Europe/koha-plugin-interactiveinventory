@@ -167,6 +167,8 @@ export default {
         }
         const data = await response.json();
         console.log('Session started:', data);
+        this.sessionData.response_data = data; // Add this line to include the response data in sessionData
+
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       }

@@ -107,8 +107,8 @@ sub get_item_data {
         return;
     }
 
-    # Process the barcode (e.g., look up item data in the database)
-    # For demonstration, let's assume we have a function `lookup_item_by_barcode`
+   # Process the barcode (e.g., look up item data in the database)
+   # For demonstration, let's assume we have a function `lookup_item_by_barcode`
     my $item_data = lookup_item_by_barcode($barcode);
 
     # Return the item data as a JSON response
@@ -146,45 +146,76 @@ sub start_session {
     my @quoted_itemtypes = map { "'$_'" } @itemtype_codes;
     warn Dumper(@itemtype_codes);
 
-    my $minlocation  = $session_data->{'minlocation'};
-    my $maxlocation  = $session_data->{'maxlocation'};
-    my $location     = $session_data->{'location'};
-    my $branchcode   = $session_data->{'branchcode'};
-    my $datelastseen = $session_data->{'datelastseen'};
-    my $ccode        = $session_data->{'ccode'};
-    my @itemsarray   = ('BK');
+    my $minlocation        = $session_data->{'minLocation'};
+    my $maxLocation        = $session_data->{'maxLocation'};
+    my $locationLoop       = $session_data->{'locationLoop'};
+    my $branchLoop         = $session_data->{'branchLoop'};
+    my $dateLastSeen       = $session_data->{'dateLastSeen'};
+    my $ccode              = $session_data->{'ccode'};
+    my $classSource        = $session_data->{'classSource'};
+    my $selectedStatuses   = $session_data->{'selectedStatuses'};
+    my $ignoreIssued       = $session_data->{'ignoreIssued'};
+    my $ignoreWaitingHolds = $session_data->{'ignoreWaitingHolds'};
+    my @selectedItypes = map { "'$_'" } @{ $session_data->{'selectedItypes'} };
 
-    warn Dumper($minlocation);
-    warn Dumper($maxlocation);
-    warn Dumper($location);
-    warn Dumper($branchcode);
-    warn Dumper($datelastseen);
-    warn Dumper($ccode);
+    # Log all variables
+    warn "minlocation: $minlocation";
+    warn "maxLocation: $maxLocation";
+    warn "locationLoop: $locationLoop";
+    warn "branchLoop: $branchLoop";
+    warn "dateLastSeen: $dateLastSeen";
+    warn "ccode: $ccode";
+    warn "classSource: $classSource";
+    warn "selectedStatuses: $selectedStatuses";
+    warn "ignoreIssued: $ignoreIssued";
+    warn "ignoreWaitingHolds: $ignoreWaitingHolds";
+    warn "selectedItypes: " . join( ", ", @selectedItypes );
+
+    # my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
+    #     {
+    #         minlocation  => $minlocation,
+    #         maxlocation  => $maxLocation,
+    #         class_source => $classSource,
+    #         location     => $locationLoop,
+    #         ignoreissued => $ignoreIssued,
+    #         datelastseen => $dateLastSeen,
+    #         branchcode   => $branchLoop,
+    #         branch       => 'homebranch',
+    #         offset       => 0,
+    #         statushash   => 0,
+    #         ccode        => $ccode,
+    #         itemtypes    => \@selectedItypes,
+    #     }
+    # );
 
     my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
         {
             minlocation  => $minlocation,
-            maxlocation  => $maxlocation,
-            location     => $location,
-            ignoreissued => 0,
-            datelastseen => $datelastseen,
             branchcode   => $branchcode,
-            branch       => 'CPL',
+            maxlocation  => $maxLocation,
+            class_source => $classSource,
+            location     => $locationLoop,
+            ignoreissued => $ignoreIssued,
+            datelastseen => $dateLastSeen,
+            branch       => 'homebranch',
             offset       => 0,
-            size         => 1,
             statushash   => 0,
-            itemtypes    => \@quoted_itemtypes,
+            ccode        => $ccode,
+            itemtypes    => \@selectedItypes,
         }
     );
 
-    # Combine location_data and iTotalRecords into an array
-    my @combined_data = ( $location_data, $iTotalRecords );
 
-    # Encode the array as JSON
-    my $json_output = encode_json( \@combined_data );
 
-    # Print the JSON-encoded array
-    print $json_output;
+my $response = {
+    location_data => $location_data,
+    total_records => $iTotalRecords,
+};
+
+
+# Print the JSON-encoded response
+print "Content-Type: application/json\n\n";
+print encode_json($response);
 }
 
 =head3
