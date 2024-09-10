@@ -63,5 +63,92 @@
         }
       }
     }
+  },
+  "/item/checkin": {
+    "post": {
+      "x-mojo-to": "Com::InteractiveInventory::Controllers::Items#checkInItem",
+      "operationId": "checkInItem",
+      "tags": [
+        "inventory"
+      ],
+      "produces": [
+        "application/json"
+      ],
+      "consumes": [
+        "application/json"
+      ],
+      "parameters": [
+        {
+          "name": "item",
+          "in": "body",
+          "required": true,
+          "description": "Item check-in data",
+          "schema": {
+            "type": "object",
+            "required": [
+              "barcode",
+              "date"
+            ],
+            "properties": {
+              "barcode": {
+                "type": "string",
+                "description": "The barcode of the item to check in"
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The date of check-in"
+              }
+            }
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Item checked in successfully",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Invalid input",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Item not found",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal server error",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

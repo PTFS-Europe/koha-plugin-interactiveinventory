@@ -5,6 +5,9 @@ use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON qw(decode_json);
 use Try::Tiny;
 use Data::Dumper;
+use C4::Circulation qw( AddReturn );
+use Koha::DateUtils qw( dt_from_string );
+
 
 sub modifyItemFields {
     my $self = shift;
@@ -55,5 +58,54 @@ sub modifyItemFields {
             json   => { error => "Failed to update item: $error" }
         );
     };
+}
+
+sub checkInItem {
+    my $self = shift;
+
+    # Parse JSON from request body
+    my $data = $self->req->json;
+
+    # Validate required fields
+    unless ( $data->{barcode} ) {
+        return $self->render(
+            status => 400,
+            json   => { error => 'Missing barcode' }
+        );
+    }
+    unless ( $data->{date} ) {
+        return $self->render(
+            status => 400,
+            json   => { error => 'Missing date' }
+        );
+    }
+    
+
+    # Find the item by barcode
+    my $item = Koha::Items->find( { barcode => $data->{barcode} } );
+    unless ($item) {
+        return $self->render(
+            status => 404,
+            json   => { error => 'Item not found' }
+        );
+    }
+
+    my $item_unblessed = $item->unblessed;
+    my ($doreturn, $messages, $iteminformation, $borrower) = AddReturn($data->{barcode}, $item->homebranch);
+    if( $doreturn ) {
+        $item_unblessed->{onloan} = undef;
+        $item_unblessed->{datelastseen} = dt_from_string;
+        $self->render(
+            status => 200,
+            json   => { success => 'Item checked-in successfully' }
+        );
+    } else {
+        return $self->render(
+            status => 500,
+            json   => { error => "Failed to check in item" }
+        );
+    }
+        
+    
 }
 1
