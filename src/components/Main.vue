@@ -1,14 +1,14 @@
 <template>
-  <Test :csrfToken="csrfToken" />
+  <Inventory :csrfToken="csrfToken" />
 </template>
 
 <script>
-import Test from './test.vue'
+import Inventory from './Inventory.vue'
 
 export default {
   name: 'Main',
   components: {
-    Test
+    Inventory
   },
   data() {
     return {

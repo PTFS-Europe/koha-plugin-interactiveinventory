@@ -137,7 +137,8 @@ export default {
             body: JSON.stringify({
               barcode: barcode,
               fields: {
-                itemlost: '0'
+                itemlost: '0',
+                datelastseen: this.sessionData.inventoryDate
               }
             })
           }
