@@ -101,12 +101,18 @@ export default {
 
         // Add running 'fields to amend' variable
         var fieldsToAmend = {};
+
         if (this.sessionData.inventoryDate > combinedData.last_seen_date)
            fieldsToAmend["datelastseen"] = this.sessionData.inventoryDate;
+
         // If set to compare barcodes, check if the scanned barcode is in the expected list.
         // If not, show an alert and return.
         if (this.sessionData.compareBarcodes && !this.sessionData.response_data.location_data.includes(combinedData.external_id)) {
           combinedData.wrongPlace = true; // Flag the item as in the wrong place
+        }
+
+        if (combinedData.checked_out_date && !this.sessionData.doNotCheckIn){
+          await this.checkInItem(combinedData.external_id);
         }
 
         // Check if the item is marked as lost and update its status
@@ -117,6 +123,8 @@ export default {
             fieldsToAmend["itemlost"] = '0';
           }
         }
+
+
 
         window.combinedData = combinedData;
 
@@ -137,6 +145,28 @@ export default {
         // Clear the barcode input and focus on it
         this.barcode = '';
         this.$refs.barcodeInput.focus();
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    },
+    async checkInItem(barcode) {
+      try {
+        const response = await fetch(
+          `/api/v1/contrib/interactiveinventory/item/checkin`, 
+          {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            barcode: barcode,
+            date: this.sessionData.inventoryDate
+          })
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        console.log('Item checked in successfully');
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       }
