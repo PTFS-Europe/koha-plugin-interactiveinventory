@@ -125,6 +125,8 @@ export default {
     },
     async updateItemStatus(barcode) {
       try {
+        console.log(this.sessionData);
+        console.log('inventoryDate:', this.sessionData.inventoryDate);
         const response = await fetch(
           `/api/v1/contrib/interactiveinventory/item/fields`,
           {

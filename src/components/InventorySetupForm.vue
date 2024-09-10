@@ -139,6 +139,7 @@ export default {
       classSources: window.class_sources, 
       iTypes: [],
       selectedItypes: [],
+      inventoryDate: new Date().toISOString().split('T')[0],
     };
   },
   created() {
@@ -173,6 +174,7 @@ export default {
         ignoreWaitingHolds: this.ignoreWaitingHolds,
         selectedItypes: this.selectedItypes,
         selectedLibraryId: this.selectedLibraryId,
+        inventoryDate: this.inventoryDate,
       });
     },
     async createStatuses() {
