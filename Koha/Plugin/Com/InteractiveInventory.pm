@@ -208,6 +208,17 @@ sub start_session {
     );
 
 
+ #Modify the keys in location_data to conform to the required format
+foreach my $item (@$location_data) {
+    foreach my $key (keys %$item) {
+        my $new_key = $key;
+        $new_key =~ s/[^a-zA-Z0-9_-]/_/g;  # Replace invalid characters with underscores
+        $new_key = lcfirst($new_key);       # Ensure it starts with a lowercase letter
+        if ($new_key ne $key) {
+            $item->{$new_key} = delete $item->{$key};
+        }
+    }
+}
 
 my $response = {
     location_data => $location_data,
