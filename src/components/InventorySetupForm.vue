@@ -26,7 +26,7 @@
         <label for="library">Library</label>
         <select v-model="selectedLibraryId" id="library" class="form-control">
           <option value="">All Libraries</option>
-          <option v-for="library in libraries" :key="library.id" :value="library.id">
+          <option v-for="library in libraries" :key="library.library_id" :value="library.library_id">
             {{ library.name }}
           </option>
         </select>
@@ -172,6 +172,7 @@ export default {
         ignoreIssued: this.ignoreIssued,
         ignoreWaitingHolds: this.ignoreWaitingHolds,
         selectedItypes: this.selectedItypes,
+        selectedLibraryId: this.selectedLibraryId,
       });
     },
     async createStatuses() {
@@ -215,6 +216,7 @@ export default {
         const response = await fetch('/api/v1/public/libraries');
         const data = await response.json();
         this.libraries = data;
+        console.log ('Libraries:', this.libraries);
       } catch (error) {
         console.error('Error fetching libraries:', error);
       }

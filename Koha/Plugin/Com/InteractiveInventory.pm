@@ -157,6 +157,7 @@ sub start_session {
     my $ignoreIssued       = $session_data->{'ignoreIssued'};
     my $ignoreWaitingHolds = $session_data->{'ignoreWaitingHolds'};
     my @selectedItypes = map { "'$_'" } @{ $session_data->{'selectedItypes'} };
+    my $selectedbranchcode = $session_data->{'selectedLibraryId'};
 
     # Log all variables
     warn "minlocation: $minlocation";
@@ -170,6 +171,7 @@ sub start_session {
     warn "ignoreIssued: $ignoreIssued";
     warn "ignoreWaitingHolds: $ignoreWaitingHolds";
     warn "selectedItypes: " . join( ", ", @selectedItypes );
+    warn "selectedbranchcode $selectedbranchcode";
 
     # my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
     #     {
@@ -191,12 +193,12 @@ sub start_session {
     my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
         {
             minlocation  => $minlocation,
-            branchcode   => $branchcode,
-            maxlocation  => $maxLocation,
+            maxlocation  => $maxLocation,  
             class_source => $classSource,
             location     => $locationLoop,
             ignoreissued => $ignoreIssued,
             datelastseen => $dateLastSeen,
+            branchcode   => $selectedbranchcode,
             branch       => 'homebranch',
             offset       => 0,
             statushash   => 0,
