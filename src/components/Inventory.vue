@@ -103,6 +103,12 @@ export default {
         var fieldsToAmend = {};
         if (this.sessionData.inventoryDate > combinedData.last_seen_date)
            fieldsToAmend["datelastseen"] = this.sessionData.inventoryDate;
+        // If set to compare barcodes, check if the scanned barcode is in the expected list.
+        // If not, show an alert and return.
+        if (this.sessionData.compareBarcodes && !this.sessionData.response_data.location_data.includes(combinedData.external_id)) {
+          combinedData.wrongPlace = true; // Flag the item as in the wrong place
+        }
+
         // Check if the item is marked as lost and update its status
         if (combinedData.lost_status != "0") {
           combinedData.wasLost = true; // Flag the item as previously lost

@@ -17,7 +17,7 @@
       <p><strong>Last Seen Date:</strong> {{ item.last_seen_date }}</p>
       <p><strong>URL:</strong> <a :href="constructedUrl" target="_blank" @click.stop>{{ constructedUrl }}</a></p>
       <p v-if="item.wasLost" class="item-warning"><strong>Warning:</strong> This item was previously marked as lost. Reason: {{ lostReason }}</p>
-      <p v-if="item.wrongPlace" class="item-warning"><strong>Warning:</strong> This item is in the wrong place, please move it!</p>
+      <p v-if="item.wrongPlace" class="item-warning"><strong>Warning:</strong> This item may be in the wrong place. It is not in the list of expected items to be scanned.</p>
       <p v-if="item.checked_out_date" class="item-warning"><strong>Warning:</strong> This item was checked out on: {{ item.checked_out_date }} and has not been checked in.</p>
     </div>
   </div>
