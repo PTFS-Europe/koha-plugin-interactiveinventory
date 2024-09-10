@@ -99,10 +99,17 @@ export default {
         // Combine item data and biblio data
         const combinedData = { ...itemData, biblio: biblioData };
 
+        // Add running 'fields to amend' variable
+        var fieldsToAmend = {};
+        if (this.sessionData.inventoryDate > combinedData.last_seen_date)
+           fieldsToAmend["datelastseen"] = this.sessionData.inventoryDate;
         // Check if the item is marked as lost and update its status
         if (combinedData.lost_status != "0") {
-          await this.updateItemStatus(combinedData.external_id);
           combinedData.wasLost = true; // Flag the item as previously lost
+          //add the key-value pair to the fields to amend object
+          if (!this.sessionData.doNotCheckIn){
+            fieldsToAmend["itemlost"] = '0';
+          }
         }
 
         window.combinedData = combinedData;
@@ -116,6 +123,11 @@ export default {
           isExpanded: index === 0 // Only expand the first item
         }));
 
+        // Update the item status
+        if (Object.keys(fieldsToAmend).length > 0){
+          await this.updateItemStatus(combinedData.external_id, fieldsToAmend);
+        }
+
         // Clear the barcode input and focus on it
         this.barcode = '';
         this.$refs.barcodeInput.focus();
@@ -123,10 +135,11 @@ export default {
         console.error('There was a problem with the fetch operation:', error);
       }
     },
-    async updateItemStatus(barcode) {
+    async updateItemStatus(barcode, fields = {}) {
       try {
         console.log(this.sessionData);
         console.log('inventoryDate:', this.sessionData.inventoryDate);
+        console.log(fields);
         const response = await fetch(
           `/api/v1/contrib/interactiveinventory/item/fields`,
           {
@@ -136,10 +149,7 @@ export default {
             },
             body: JSON.stringify({
               barcode: barcode,
-              fields: {
-                itemlost: '0',
-                datelastseen: this.sessionData.inventoryDate
-              }
+              fields: fields
             })
           }
         );
