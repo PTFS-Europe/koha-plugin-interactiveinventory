@@ -8,7 +8,7 @@
           <input type="date" id="inventoryDate" v-model="inventoryDate" />
         </div>
         <div>
-          <label for="compareBarcodes">Compare barcodes list to results:</label>
+          <label for="compareBarcodes">Compare expected barcodes list to scanned barcodes:</label>
           <input type="checkbox" id="compareBarcodes" v-model="compareBarcodes" />
         </div>
         <div>
@@ -175,6 +175,9 @@ export default {
         selectedItypes: this.selectedItypes,
         selectedLibraryId: this.selectedLibraryId,
         inventoryDate: this.inventoryDate,
+        compareBarcodes: this.compareBarcodes,
+        doNotCheckIn: this.doNotCheckIn,
+        checkShelvedOutOfOrder: this.checkShelvedOutOfOrder,
       });
     },
     async createStatuses() {
