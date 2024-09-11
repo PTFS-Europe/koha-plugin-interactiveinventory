@@ -46,6 +46,7 @@
 <script>
 import InventorySetupForm from './InventorySetupForm.vue'
 import InventoryItem from './InventoryItem.vue'
+import { EventBus } from './eventBus'
 
 export default {
   components: {
@@ -116,7 +117,6 @@ export default {
         const itemText = await itemResponse.text();
         const itemsArray = itemText ? JSON.parse(itemText) : [];
         const itemData = itemsArray[0] || {};
-        console.log('Item data:', itemData);
 
         // Fetch biblio data using biblio_id from item data
         const biblioResponse = await fetch(
@@ -134,7 +134,6 @@ export default {
         const biblioText = await biblioResponse.text();
         const biblioData = biblioText ? JSON.parse(biblioText) : {};
         window.biblioData = biblioData;
-        console.log('Biblio data:', biblioData);
 
         // Combine item data and biblio data
         const combinedData = { ...itemData, biblio: biblioData };
@@ -198,7 +197,8 @@ export default {
         this.barcode = '';
         this.$refs.barcodeInput.focus();
       } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        console.error(error);
+        EventBus.emit('message', { text: `Error scanning barcode: ${error.message}`, type: 'error' });
       }
     },
     async checkInItem(barcode) {
@@ -218,16 +218,13 @@ export default {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        console.log('Item checked in successfully');
+        EventBus.emit('message', { text: 'Item checked in successfully', type: 'status' });
       } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        EventBus.emit('message', { text: `Error checking in item: ${error.message}`, type: 'error' });
       }
     },
     async updateItemStatus(barcode, fields = {}) {
       try {
-        console.log(this.sessionData);
-        console.log('inventoryDate:', this.sessionData.inventoryDate);
-        console.log(fields);
         const response = await fetch(
           `/api/v1/contrib/interactiveinventory/item/fields`,
           {
@@ -245,9 +242,9 @@ export default {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Item status updated:', data);
+        EventBus.emit('message', { text: 'Item statuses updated successfully', type: 'status' });
       } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        EventBus.emit('message', { text: 'Error updating item statuses', type: 'error' });
       }
     },
     async initiateInventorySession(sessionData) {
@@ -267,11 +264,10 @@ export default {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Session started:', data);
         this.sessionData.response_data = data; // Add this line to include the response data in sessionData
 
       } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        EventBus.emit('message', { text: `Error starting inventory session ${error.message}`, type: 'error' });
       }
     },
     handleToggleExpand(itemId) {
@@ -291,7 +287,7 @@ export default {
           return values;
         })
         .catch(error => {
-          console.error('Error fetching authorized values:', error);
+          EventBus.emit('message', { type: 'error', text: `Error fetching authorized values: ${error.message}` });
           throw error;
         });
     },

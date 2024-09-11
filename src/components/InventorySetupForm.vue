@@ -107,6 +107,8 @@
 </template>
 
 <script>
+import { EventBus } from './eventBus';
+
 export default {
   props: {
     fetchAuthorizedValues: {
@@ -218,13 +220,11 @@ export default {
             description: item.description
           }));
         } else {
-          console.error(`Unexpected result format for ${statusFields[key]}:`, result);
+          EventBus.emit('message', { type: 'error', text: `Unexpected result format for ${statusFields[key]}, ${result}` });
         }
       });
-
-      console.log('Statuses:', this.statuses);
     } catch (error) {
-      console.error('Error creating statuses:', error);
+      EventBus.emit('message', { type: 'error', text: `Error creating statuses: ${error.message}` });
     }
   },
   async fetchLibraries() {
@@ -232,9 +232,8 @@ export default {
         const response = await fetch('/api/v1/public/libraries');
         const data = await response.json();
         this.libraries = data;
-        console.log ('Libraries:', this.libraries);
       } catch (error) {
-        console.error('Error fetching libraries:', error);
+        EventBus.emit('message', { type: 'error', text: `Error fetching libraries: ${error.message}` });
       }
     },
     async fetchItemTypes() {
@@ -243,7 +242,7 @@ export default {
         const data = await response.json();
         this.iTypes = data;
       } catch (error) {
-        console.error('Error fetching itemTypes:', error);
+        EventBus.emit('message', { type: 'error', text: `Error fetching itemTypes: ${error.message}` });
       }
     },
     async fetchCollectionCodes() {
@@ -251,7 +250,7 @@ export default {
         const collectionCodes = await this.fetchAuthorizedValues('CCODE');
         this.collectionCodes = collectionCodes;
       } catch (error) {
-        console.error(error);
+        EventBus.emit('message', { type: 'error', text: `Error fetching collection codes: ${error.message}` });
       }
     },
     async fetchShelvingLocations() {
@@ -259,7 +258,7 @@ export default {
         const shelvingLocations = await this.fetchAuthorizedValues('LOC');
         this.shelvingLocations = shelvingLocations;
       } catch (error) {
-        console.error(error);
+        EventBus.emit('message', { type: 'error', text: `Error fetching shelving locations: ${error.message}` });
       }
     },
     toggleItype(itemTypeId) {

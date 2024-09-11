@@ -40,6 +40,8 @@
 
 
 <script>
+import { EventBus } from './eventBus';
+
 export default {
   props: {
     currentItemWithHighestCallNumber: String,
@@ -83,10 +85,7 @@ export default {
     },
     lostReason() {
       const lostStatusValue = this.item.lost_status;
-      console.log('Item lost status value:', lostStatusValue);
-      console.log('Authorized values:', this.authorizedValues);
       const reason = this.authorizedValues[lostStatusValue];
-      console.log('Resolved reason:', reason);
       return reason || 'Unknown';
     }
   },
@@ -100,18 +99,15 @@ export default {
 
       if (cachedValues) {
         this.authorizedValues = JSON.parse(cachedValues);
-        console.log('Using cached authorized values:', this.authorizedValues);
       } else {
         try {
           const values = await this.fetchAuthorizedValues(field);
-          console.log('Fetched values:', values);
 
           // Directly use the values object
           this.authorizedValues = values;
           sessionStorage.setItem(cacheKey, JSON.stringify(values));
-          console.log('Fetched and cached authorized values:', this.authorizedValues);
         } catch (error) {
-          console.error('Error setting authorized values:', error);
+          EventBus.emit('message', { type: 'error', text: 'Error setting authorized values' });
         }
       }
     },
