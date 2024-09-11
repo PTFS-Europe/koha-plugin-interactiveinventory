@@ -31,10 +31,11 @@
           </option>
         </select>
       </div>
-      <div>
-        <label for="locationloop">Location Loop:</label>
-        <select id="locationloop" v-model="locationLoop">
-          <!-- Options here -->
+      <div class="form-group">
+        <label for="shelvingLocation">Shelving Location</label>
+        <select v-model="shelvingLocation" id="shelvingLocation" class="form-control">
+          <option value="" disabled>Select a shelving location</option>
+          <option v-for="shelvingLocation, key in shelvingLocations" :key="key" :value="key">{{ shelvingLocation }}</option>
         </select>
       </div>
       <div class="form-group">
@@ -140,6 +141,8 @@ export default {
       iTypes: [],
       selectedItypes: [],
       inventoryDate: new Date().toISOString().split('T')[0],
+      shelvingLocations: [],
+      shelvingLocation: '',
     };
   },
   created() {
@@ -147,6 +150,7 @@ export default {
     this.fetchLibraries();
     this.fetchCollectionCodes();
     this.fetchItemTypes();
+    this.fetchShelvingLocations();
   },
   methods: {
     checkForm() {
@@ -178,6 +182,7 @@ export default {
         compareBarcodes: this.compareBarcodes,
         doNotCheckIn: this.doNotCheckIn,
         checkShelvedOutOfOrder: this.checkShelvedOutOfOrder,
+        shelvingLocation: this.shelvingLocation,
       });
     },
     async createStatuses() {
@@ -239,6 +244,14 @@ export default {
       try {
         const collectionCodes = await this.fetchAuthorizedValues('CCODE');
         this.collectionCodes = collectionCodes;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async fetchShelvingLocations() {
+      try {
+        const shelvingLocations = await this.fetchAuthorizedValues('LOC');
+        this.shelvingLocations = shelvingLocations;
       } catch (error) {
         console.error(error);
       }
