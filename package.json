@@ -17,6 +17,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "mitt": "^3.0.1",
     "vue": "^3.4.30",
     "vue-router": "^4.3.0",
     "webpack": "^5.92.1",
