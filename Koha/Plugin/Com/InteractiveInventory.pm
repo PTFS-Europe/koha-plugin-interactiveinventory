@@ -146,8 +146,9 @@ sub start_session {
     my @quoted_itemtypes = map { "'$_'" } @itemtype_codes;
     warn Dumper(@itemtype_codes);
 
-    my $minlocation        = $session_data->{'minLocation'};
+    my $minLocation        = $session_data->{'minLocation'};
     my $maxLocation        = $session_data->{'maxLocation'};
+    $maxLocation=$minLocation.'Z' unless ( $maxLocation || ! $minLocation );
     my $locationLoop       = $session_data->{'locationLoop'};
     my $branchLoop         = $session_data->{'branchLoop'};
     my $dateLastSeen       = $session_data->{'dateLastSeen'};
@@ -160,7 +161,7 @@ sub start_session {
     my $selectedbranchcode = $session_data->{'selectedLibraryId'};
 
     # Log all variables
-    warn "minlocation: $minlocation";
+    warn "minlocation: $minLocation";
     warn "maxLocation: $maxLocation";
     warn "locationLoop: $locationLoop";
     warn "branchLoop: $branchLoop";
@@ -189,21 +190,31 @@ sub start_session {
     #         itemtypes    => \@selectedItypes,
     #     }
     # );
+    my ( $rightPlaceList ) = GetItemsForInventory(
+        {
+            minlocation  => $minLocation,
+            maxlocation  => $maxLocation,
+            location     => $locationLoop,
+            branch       => 'homebranch',
+            ccode        => $ccode,
+        }
+    );
 
     my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
         {
-            minlocation  => $minlocation,
-            maxlocation  => $maxLocation,  
-            class_source => $classSource,
-            location     => $locationLoop,
-            ignoreissued => $ignoreIssued,
-            datelastseen => $dateLastSeen,
-            branchcode   => $selectedbranchcode,
-            branch       => 'homebranch',
-            offset       => 0,
-            statushash   => 0,
-            ccode        => $ccode,
-            itemtypes    => \@selectedItypes,
+            minlocation         => $minLocation,
+            maxlocation         => $maxLocation,
+            class_source        => $classSource,
+            location            => $locationLoop,
+            ignoreissued        => $ignoreIssued,
+            datelastseen        => $dateLastSeen,
+            branchcode          => $selectedbranchcode,
+            branch              => 'homebranch',
+            offset              => 0,
+            statushash          => $selectedStatuses,
+            ccode               => $ccode,
+            ignore_waiting_holds=> $ignoreWaitingHolds,
+            itemtypes           => \@selectedItypes,
         }
     );
 
@@ -219,10 +230,22 @@ foreach my $item (@$location_data) {
         }
     }
 }
+## do the same for rightPlaceList
+foreach my $item (@$rightPlaceList) {
+    foreach my $key (keys %$item) {
+        my $new_key = $key;
+        $new_key =~ s/[^a-zA-Z0-9_-]/_/g;  # Replace invalid characters with underscores
+        $new_key = lcfirst($new_key);       # Ensure it starts with a lowercase letter
+        if ($new_key ne $key) {
+            $item->{$new_key} = delete $item->{$key};
+        }
+    }
+}
 
 my $response = {
     location_data => $location_data,
     total_records => $iTotalRecords,
+    rightPlaceList => $rightPlaceList,
 };
 
 
