@@ -148,7 +148,7 @@ export default {
         if (combinedData.lost_status != "0") {
           combinedData.wasLost = true; // Flag the item as previously lost
           //add the key-value pair to the fields to amend object
-          if (!this.sessionData.doNotCheckIn){
+          if (!this.sessionData.ignoreLostStatus){
             fieldsToAmend["itemlost"] = '0';
           }
         }

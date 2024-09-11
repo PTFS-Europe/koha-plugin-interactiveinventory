@@ -84,8 +84,8 @@
           (Skip records marked as seen on or after this date.)
         </li>
         <li>
-          <label for="ignoreissued">Skip items on loan: </label>
-          <input type="checkbox" id="ignoreissued" v-model="ignoreIssued" />
+          <label for="ignoreLostStatus">Skip automatically fixing scanned lost items </label>
+          <input type="checkbox" id="ignoreLostStatus" v-model="ignoreLostStatus" />
         </li>
         <li>
           <label for="ignore_waiting_holds">Skip items on hold awaiting pickup: </label>
@@ -182,6 +182,7 @@ export default {
         compareBarcodes: this.compareBarcodes,
         doNotCheckIn: this.doNotCheckIn,
         checkShelvedOutOfOrder: this.checkShelvedOutOfOrder,
+        ignoreLostStatus: this.ignoreLostStatus,
         shelvingLocation: this.shelvingLocation,
       });
     },
