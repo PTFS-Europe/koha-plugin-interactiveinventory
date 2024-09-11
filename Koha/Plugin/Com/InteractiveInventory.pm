@@ -245,7 +245,7 @@ foreach my $item (@$rightPlaceList) {
 my $response = {
     location_data => $location_data,
     total_records => $iTotalRecords,
-    rightPlaceList => $rightPlaceList,
+    right_place_list => $rightPlaceList,
 };
 
 

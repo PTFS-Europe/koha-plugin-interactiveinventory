@@ -137,7 +137,7 @@ export default {
 
         // If set to compare barcodes, check if the scanned barcode is in the expected list.
         // If not, show an alert and return.
-        if (this.sessionData.compareBarcodes && !this.sessionData.response_data.rightPlaceList_data.includes(combinedData.external_id)) {
+        if (this.sessionData.compareBarcodes && !this.sessionData.response_data.right_place_list.includes(combinedData.external_id)) {
           combinedData.wrongPlace = true; // Flag the item as in the wrong place
         }
 
