@@ -42,7 +42,7 @@
 <script>
 export default {
   props: {
-    currentItemWithHighestCallNumber: Number,
+    currentItemWithHighestCallNumber: String,
     currentBiblioWithHighestCallNumber: Number,
     sessionData: Object,
     item: Object,
