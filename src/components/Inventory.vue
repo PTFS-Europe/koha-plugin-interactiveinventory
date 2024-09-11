@@ -24,7 +24,19 @@
           :currentBiblioWithHighestCallNumber="biblioWithHighestCallNumber"
         />  
       </div>
-      <button @click="exportToCSV">Export to CSV</button>
+    </div>
+  <button v-if="sessionStarted" @click="showEndSessionModal = true" class="end-session-button">End Session</button>
+
+    <!-- End Session Modal -->
+    <div v-if="showEndSessionModal" class="modal">
+      <div class="modal-content">
+        <span @click="showEndSessionModal = false" class="close">&times;</span>
+        <h2>End Session</h2>
+        <label>
+          <input type="checkbox" id="exportToCSV" v-model="exportToCSV"> Export to CSV
+        </label>
+        <button @click="endSession" class="end-session-modal-button">End Session</button>
+      </div>
     </div>
   </div>
 </template>
@@ -47,9 +59,20 @@ export default {
       highestCallNumberSort: '',
       itemWithHighestCallNumber: '',
       biblioWithHighestCallNumber: '',
+      showEndSessionModal: false,
+      exportToCSV: false,
     };
   },
   methods: {
+    async endSession() {
+      if (this.exportToCSV) {
+        // Logic to export data to CSV
+        await this.exportDataToCSV();
+      }
+      // Logic to end the session
+      this.showEndSessionModal = false;
+      // Additional session ending logic
+    },
     async fetchAuthorizedValues(category) {
       const response = await fetch(`/api/v1/authorised_value_categories/${category}/authorised_values`, {
         method: 'GET',
@@ -259,7 +282,7 @@ export default {
           throw error;
         });
     },
-    exportToCSV() {
+    exportDataToCSV() {
       const headers = [
         'Item_ID', 'Biblio_ID', 'Title', 'Author', 'Publication Year', 
         'Publisher', 'ISBN', 'Pages', 'Location', 'Acquisition Date', 'Last Seen Date', 'URL', 'Was Lost', 'Lost Reason'
@@ -357,5 +380,74 @@ export default {
 
 .items-list {
   margin-top: 20px;
+}
+
+.end-session-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 1000; /* Ensure it stays above other content */
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  max-width: 90%;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 20px 0;
+  font-size: 16px;
+}
+
+.end-session-modal-button {
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.end-session-modal-button:hover {
+  background-color: #d32f2f;
 }
 </style>
