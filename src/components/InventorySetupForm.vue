@@ -114,6 +114,7 @@ export default {
       required: true
     },
   },
+  emits: ['start-session'],
   data() {
     const classSources = window.class_sources || {};
     const defaultClassSource = Object.keys(classSources).find(key => classSources[key].default === 1) || '';
@@ -133,6 +134,10 @@ export default {
       dateLastSeen: '',
       ignoreIssued: false,
       ignoreWaitingHolds: false,
+      compareBarcodes: null,
+      doNotCheckIn: false,
+      checkShelvedOutOfOrder: false,
+      ignoreLostStatus: false,
       statuses: {},
       libraries: [],
       selectedLibraryId: '',
