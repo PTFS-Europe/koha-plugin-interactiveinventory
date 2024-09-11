@@ -32,6 +32,7 @@
       <div class="modal-content">
         <span @click="showEndSessionModal = false" class="close">&times;</span>
         <h2>End Session</h2>
+        <p v-if="uniqueBarcodesCount <= expectedUniqueBarcodes">Scanned {{ uniqueBarcodesCount }} unique barcodes of an expected {{ expectedUniqueBarcodes }} are you sure you want to end the session?</p>
         <label>
           <input type="checkbox" id="exportToCSV" v-model="exportToCSV"> Export to CSV
         </label>
@@ -50,6 +51,15 @@ export default {
   components: {
     InventorySetupForm,
     InventoryItem
+  },
+  computed: {
+    uniqueBarcodesCount() {
+        const uniqueBarcodes = new Set(this.items.map(item => item.external_id));
+        return uniqueBarcodes.size;
+      },
+    expectedUniqueBarcodes() {
+      return this.sessionData.response_data.total_records || 0;
+    }
   },
   data() {
     return {
@@ -137,8 +147,9 @@ export default {
 
         // If set to compare barcodes, check if the scanned barcode is in the expected list.
         // If not, show an alert and return.
-        if (this.sessionData.compareBarcodes && !this.sessionData.response_data.right_place_list.includes(combinedData.external_id)) {
-          combinedData.wrongPlace = true; // Flag the item as in the wrong place
+        const isInRightPlaceList = this.sessionData.response_data.right_place_list.some(item => item.barcode === combinedData.external_id);
+        if (this.sessionData.compareBarcodes && !isInRightPlaceList) {
+        combinedData.wrongPlace = true; // Flag the item as in the wrong place
         }
 
         if (combinedData.checked_out_date && !this.sessionData.doNotCheckIn){
@@ -386,7 +397,7 @@ export default {
 .end-session-button {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 20px;
   padding: 10px 20px;
   background-color: #f44336;
   color: white;
