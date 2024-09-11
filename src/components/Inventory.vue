@@ -177,6 +177,7 @@ export default {
           this.checkItemStatuses(combinedData, this.sessionData.selectedStatuses);
         }
 
+        combinedData.wasScanned = true;
         window.combinedData = combinedData;
 
         // Prepend the combined data to the items array
@@ -296,28 +297,56 @@ export default {
     },
     exportDataToCSV() {
       const headers = [
-        'Item_ID', 'Biblio_ID', 'Title', 'Author', 'Publication Year', 
-        'Publisher', 'ISBN', 'Pages', 'Location', 'Acquisition Date', 'Last Seen Date', 'URL', 'Was Lost', 'Lost Reason'
+        'Barcode','Item ID', 'Biblio ID', 'Title', 'Author', 'Publication Year', 'Publisher', 'ISBN', 'Pages', 'Location', 'Acquisition Date', 'Last Seen Date', 'URL', 'Was Lost', 'Wrong Place', 'Was Checked Out', 'Scanned Out of Order', 'Had Invalid "Not for loan" Status','Scanned'
+      ];
+
+      // Create a map of scanned items using their barcodes
+      const scannedItemsMap = new Map(this.items.map(item => [item.external_id, item]));
+
+      // Create a set of barcodes from the expected items
+      const expectedBarcodesSet = new Set(this.sessionData.response_data.location_data.map(item => item.barcode));
+
+      // Combine expected items and scanned items
+      const combinedItems = [
+        ...this.sessionData.response_data.location_data,
+        ...this.items.filter(item => !expectedBarcodesSet.has(item.external_id))
       ];
 
       const csvContent = [
         headers.join(','),
-        ...this.items.map(item => {
+        ...combinedItems.map(item => {
+          const scannedItem = scannedItemsMap.get(item.barcode);
+          const combinedItem = { ...item };
+
+          if (scannedItem) {
+            for (const key in scannedItem) {
+              if (!combinedItem.hasOwnProperty(key) || combinedItem[key] === null || combinedItem[key] === undefined) {
+                combinedItem[key] = scannedItem[key];
+              }
+            }
+          }
+          const wasScanned = scannedItem || combinedItem.wasScanned;
+
           return [
-            `"${item.item_id}"`,
-            `"${item.biblio_id}"`,
-            `"${item.biblio.title}"`,
-            `"${item.biblio.author || 'N/A'}"`,
-            `"${item.biblio.publication_year || 'N/A'}"`,
-            `"${item.biblio.publisher || 'N/A'}"`,
-            `"${item.biblio.isbn || 'N/A'}"`,
-            `"${item.biblio.pages || 'N/A'}"`,
-            `"${item.location}"`,
-            `"${item.acquisition_date}"`,
-            `"${item.last_seen_date}"`,
-            `"${window.location.origin}/cgi-bin/koha/catalogue/detail.pl?biblionumber=${item.biblio_id}"`,
-            `"${item.wasLost ? 'Yes' : 'No'}"`,
-            `"${item.wasLost ? item.lostReason : 'N/A'}"`
+            `"${combinedItem.barcode|| combinedItem.external_id}"`,
+            `"${combinedItem.itemnumber || combinedItem.item_id}"`,
+            `"${combinedItem.biblionumber || combinedItem.biblio_id}"`,
+            `"${combinedItem.title || combinedItem.biblio.title || 'N/A'}"`,
+            `"${combinedItem.author || combinedItem.biblio.author || 'N/A'}"`,
+            `"${combinedItem.biblio?.publication_year  || 'N/A'}"`,
+            `"${combinedItem.biblio?.publisher || 'N/A'}"`,
+            `"${combinedItem.biblio?.isbn || 'N/A'}"`,
+            `"${combinedItem.biblio?.pages || 'N/A'}"`,
+            `"${combinedItem.location}"`,
+            `"${combinedItem.acquisition_date || 'N/A'}"`,
+            `"${combinedItem.datelastseen || combinedItem.last_seen_date || 'N/A'}"`,
+            `"${window.location.origin}/cgi-bin/koha/catalogue/detail.pl?biblionumber=${combinedItem.biblionumber || combinedItem.biblio_id}"`,
+            `"${combinedItem.wasLost === '1' ? 'Yes' : 'No'}"`,
+            `"${combinedItem.wrongPlace ? 'Yes' : 'No'}"`,
+            `"${combinedItem.checked_out_date ? 'Yes' : 'No'}"`,
+            `"${combinedItem.outOfOrder ? 'Yes' : 'No'}"`,
+            `"${combinedItem.invalidStatus ? 'Yes' : 'No'}"`,
+            `"${wasScanned ? 'Yes' : 'NOT SCANNED'}"`
           ].join(',');
         })
       ].join('\n');
@@ -327,7 +356,9 @@ export default {
       const a = document.createElement('a');
       a.href = url;
       a.download = 'inventory.csv';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     },
     checkItemStatuses(item, selectedStatuses) {
