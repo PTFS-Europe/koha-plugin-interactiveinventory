@@ -1,6 +1,6 @@
 <template>
-  <Inventory :csrfToken="csrfToken" />
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
+    <Inventory/>
 </template>
 
 <script>
