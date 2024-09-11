@@ -19,6 +19,8 @@
       <p v-if="item.wasLost" class="item-warning"><strong>Warning:</strong> This item was previously marked as lost. Reason: {{ lostReason }}</p>
       <p v-if="item.wrongPlace" class="item-warning"><strong>Warning:</strong> This item may be in the wrong place. It is not in the list of expected items to be scanned.</p>
       <p v-if="item.checked_out_date" class="item-warning"><strong>Warning:</strong> This item was checked out on: {{ item.checked_out_date }} and has not been checked in.</p>
+        <p v-if="item.outOfOrder" class="item-warning"><strong>Warning:</strong></p><p v-if="item.outOfOrder" class="item-warning">This item has been scanned out of order. It should have been scanned before <a :href="highestCallNumberUrl" target="_blank" @click.stop>{{ currentItemWithHighestCallNumber }}</a>.
+        </p>
     </div>
   </div>
 </template>
@@ -26,6 +28,8 @@
 <script>
 export default {
   props: {
+    currentItemWithHighestCallNumber: Number,
+    currentBiblioWithHighestCallNumber: Number,
     item: Object,
     isExpanded: Boolean,
     index: Number,
@@ -43,8 +47,11 @@ export default {
     this.fetchAndSetAuthorizedValues('LOST');
   },
   computed: {
+    highestCallNumberUrl() {
+        return `/cgi-bin/koha/catalogue/detail.pl?biblionumber=${this.currentBiblioWithHighestCallNumber}`;
+    },
     hasIssue() {
-      return this.item.wasLost || this.item.wrongPlace || this.item.checked_out_date;
+      return this.item.wasLost || this.item.wrongPlace || this.item.checked_out_date || this.item.outOfOrder || this.item.invalidStatus;
     },
     issueIcon() {
       return this.hasIssue ? '✖' : '✔';

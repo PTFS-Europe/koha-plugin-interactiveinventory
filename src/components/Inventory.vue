@@ -19,6 +19,8 @@
           :isExpanded="item.isExpanded"
           @toggleExpand="handleToggleExpand"
           :fetchAuthorizedValues="fetchAuthorizedValues"
+          :currentItemWithHighestCallNumber="itemWithHighestCallNumber"
+          :currentBiblioWithHighestCallNumber="biblioWithHighestCallNumber"
         />  
       </div>
       <button @click="exportToCSV">Export to CSV</button>
@@ -41,6 +43,9 @@ export default {
       items: [],
       sessionData: null,
       sessionStarted: false,
+      highestCallNumberSort: '',
+      itemWithHighestCallNumber: '',
+      biblioWithHighestCallNumber: '',
     };
   },
   methods: {
@@ -124,6 +129,13 @@ export default {
           }
         }
 
+        if (this.sessionData.checkShelvedOutOfOrder && combinedData.call_number_sort < this.highestCallNumberSort){
+          combinedData.outOfOrder = 1;
+        } else {
+          this.highestCallNumberSort = combinedData.call_number_sort;
+          this.itemWithHighestCallNumber = combinedData.external_id;
+          this.biblioWithHighestCallNumber = combinedData.biblio_id;
+        }
 
 
         window.combinedData = combinedData;
