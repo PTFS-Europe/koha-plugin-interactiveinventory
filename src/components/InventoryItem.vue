@@ -6,19 +6,29 @@
       {{ item.biblio.title }} - {{ item.external_id }}
     </p>
     <div v-if="isExpanded" class="item-details">
-      <p><strong>Title:</strong> {{ item.biblio.title }}</p>
-      <p><strong>Author:</strong> {{ item.biblio.author || 'N/A' }}</p>
-      <p><strong>Publication Year:</strong> {{ item.biblio.publication_year || 'N/A' }}</p>
-      <p><strong>Publisher:</strong> {{ item.biblio.publisher || 'N/A' }}</p>
-      <p><strong>ISBN:</strong> {{ item.biblio.isbn || 'N/A' }}</p>
-      <p><strong>Pages:</strong> {{ item.biblio.pages || 'N/A' }}</p>
-      <p><strong>Location:</strong> {{ item.location }}</p>
-      <p><strong>Acquisition Date:</strong> {{ item.acquisition_date }}</p>
-      <p><strong>Last Seen Date:</strong> {{ item.last_seen_date }}</p>
-      <p><strong>URL:</strong> <a :href="constructedUrl" target="_blank" @click.stop>{{ constructedUrl }}</a></p>
-      <p v-if="item.wasLost" class="item-warning"><strong>Warning:</strong> This item was previously marked as lost. Reason: {{ lostReason }}</p>
-      <p v-if="item.wrongPlace" class="item-warning"><strong>Warning:</strong> This item may be in the wrong place. It is not in the list of expected items to be scanned.</p>
-      <p v-if="item.checked_out_date" class="item-warning"><strong>Warning:</strong> This item was checked out on: {{ item.checked_out_date }} and has not been checked in.</p>
+      <div class="item-details-grid">
+        <p><strong>Title:</strong></p><p>{{ item.biblio.title }}</p>
+        <p><strong>Author:</strong></p><p>{{ item.biblio.author || 'N/A' }}</p>
+        <p><strong>Publication Year:</strong></p><p>{{ item.biblio.publication_year || 'N/A' }}</p>
+        <p><strong>Publisher:</strong></p><p>{{ item.biblio.publisher || 'N/A' }}</p>
+        <p><strong>ISBN:</strong></p><p>{{ item.biblio.isbn || 'N/A' }}</p>
+        <p><strong>Pages:</strong></p><p>{{ item.biblio.pages || 'N/A' }}</p>
+        <p><strong>Location:</strong></p><p>{{ item.location }}</p>
+        <p><strong>Acquisition Date:</strong></p><p>{{ item.acquisition_date }}</p>
+        <p><strong>Last Seen Date:</strong></p><p>{{ item.last_seen_date }}</p>
+        <p><strong>URL:</strong></p><p><a :href="constructedUrl" target="_blank" @click.stop>{{ constructedUrl }}</a></p>
+        <p v-if="item.wasLost" class="item-warning"><strong>Warning:</strong></p><p v-if="item.wasLost" class="item-warning">This item was previously marked as lost. Reason: {{ lostReason }}</p>
+        <p v-if="item.wrongPlace" class="item-warning"><strong>Warning:</strong></p><p v-if="item.wrongPlace" class="item-warning">This item may be in the wrong place. It is not in the list of expected items to be scanned.</p>
+        <p v-if="item.checked_out_date" class="item-warning"><strong>Warning:</strong></p>
+        <p v-if="item.checked_out_date" class="item-warning">
+          This item was checked out on: {{ item.checked_out_date }} 
+          <span v-if="sessionData.doNotCheckIn"> 
+            and has not been checked in.
+          </span>
+          <span v-else>
+            and has been checked in automatically.
+          </span>
+        </p>
         <p v-if="item.outOfOrder" class="item-warning"><strong>Warning:</strong></p><p v-if="item.outOfOrder" class="item-warning">This item has been scanned out of order. It should have been scanned before <a :href="highestCallNumberUrl" target="_blank" @click.stop>{{ currentItemWithHighestCallNumber }}</a>.
         </p>
         <p v-if="item.invalidStatus" class="item-warning"><strong>Warning:</strong></p><p v-if="item.invalidStatus" class="item-warning">This item has an invalid not for loan status. Please check it is correct using the link above.</p>
@@ -26,6 +36,8 @@
     </div>
   </div>
 </template>
+
+
 
 <script>
 export default {
@@ -159,5 +171,14 @@ export default {
 .item-warning {
   color: #ff6f61;
   font-weight: bold;
+  grid-column: span 2;
+}
+
+.item-details-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px;
+  word-wrap: break-word; /* Ensure long text wraps within the column */
+  overflow-wrap: break-word; /* Alternative property for word wrapping */
 }
 </style>

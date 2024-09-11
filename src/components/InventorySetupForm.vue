@@ -1,5 +1,5 @@
 <template>
-
+  <h1>Interactive Inventory</h1>
     <form @submit.prevent="startInventorySession">
       <div class="section-container">
         <h2>Parameters</h2>
@@ -47,11 +47,11 @@
       </div>
       <div>
         <label for="minlocation">Item call number between:</label>
-        <input type="text" id="minlocation" v-model="minLocation" /> (items.itemcallnumber)
+        <input type="text" id="minlocation" v-model="minLocation"  class="call-number-input" /> (items.itemcallnumber)
       </div>
       <div>
         <label for="maxlocation">...and:</label>
-        <input type="text" id="maxlocation" v-model="maxLocation" />
+        <input type="text" id="maxlocation" v-model="maxLocation" class="call-number-input" />
       </div>
       <div>
       <label for="class_source">Call number classification scheme:</label>
@@ -77,7 +77,7 @@
         </div>
       </div>
       </fieldset>
-      <ol>
+      <ul class="no-numbering">
         <li>
           <label for="datelastseen">Last inventory date:</label>
           <input type="date" id="datelastseen" v-model="dateLastSeen" class="flatpickr" />
@@ -91,7 +91,7 @@
           <label for="ignore_waiting_holds">Skip items on hold awaiting pickup: </label>
           <input type="checkbox" id="ignore_waiting_holds" v-model="ignoreWaitingHolds" />
         </li>
-      </ol>
+      </ul>
       <div class="form-group">
           <label>Item Types</label>
           <div class="item-types-grid">
@@ -276,6 +276,7 @@ export default {
 form {
   display: flex;
   flex-direction: column;
+  line-height: 2;
 }
 label {
   margin-top: 10px;
@@ -353,5 +354,20 @@ button {
 
 .item-type-box:hover {
   background-color: #f0f0f0;
+}
+
+.no-numbering {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+fieldset {
+  padding: 0px;
+  margin: 0px;
+}
+
+.call-number-input {
+  flex: 1;
+  max-width: 200px; /* Set a max-width to prevent stretching */
 }
 </style>
