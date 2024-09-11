@@ -21,6 +21,8 @@
       <p v-if="item.checked_out_date" class="item-warning"><strong>Warning:</strong> This item was checked out on: {{ item.checked_out_date }} and has not been checked in.</p>
         <p v-if="item.outOfOrder" class="item-warning"><strong>Warning:</strong></p><p v-if="item.outOfOrder" class="item-warning">This item has been scanned out of order. It should have been scanned before <a :href="highestCallNumberUrl" target="_blank" @click.stop>{{ currentItemWithHighestCallNumber }}</a>.
         </p>
+        <p v-if="item.invalidStatus" class="item-warning"><strong>Warning:</strong></p><p v-if="item.invalidStatus" class="item-warning">This item has an invalid not for loan status. Please check it is correct using the link above.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -30,6 +32,7 @@ export default {
   props: {
     currentItemWithHighestCallNumber: Number,
     currentBiblioWithHighestCallNumber: Number,
+    sessionData: Object,
     item: Object,
     isExpanded: Boolean,
     index: Number,

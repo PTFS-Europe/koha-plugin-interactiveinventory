@@ -19,6 +19,7 @@
           :isExpanded="item.isExpanded"
           @toggleExpand="handleToggleExpand"
           :fetchAuthorizedValues="fetchAuthorizedValues"
+          :sessionData="sessionData"
           :currentItemWithHighestCallNumber="itemWithHighestCallNumber"
           :currentBiblioWithHighestCallNumber="biblioWithHighestCallNumber"
         />  
@@ -137,6 +138,9 @@ export default {
           this.biblioWithHighestCallNumber = combinedData.biblio_id;
         }
 
+        if (this.sessionData.selectedStatuses && Object.values(this.sessionData.selectedStatuses).some(statusArray => statusArray.length > 0)){
+          this.checkItemStatuses(combinedData, this.sessionData.selectedStatuses);
+        }
 
         window.combinedData = combinedData;
 
@@ -290,7 +294,24 @@ export default {
       a.download = 'inventory.csv';
       a.click();
       URL.revokeObjectURL(url);
+    },
+    checkItemStatuses(item, selectedStatuses) {
+  const statusKeyValuePairs = {
+    'items.itemlost': item.lost_status,
+    'items.notforloan': item.damaged_status,
+    'items.withdrawn': item.withdrawn,
+    'items.damaged': item.not_for_loan_status,
+  };
+
+  for (const [key, value] of Object.entries(statusKeyValuePairs)) {
+    if (value != "0" && (!selectedStatuses[key].includes(String(value)))) {
+      console.log('Invalid status:', key, value);
+      item.invalidStatus['key'] = key; // Flag the item as having an invalid status
+      item.invalidStatus['value'] = value;
+      break;
     }
+  }
+}
   }
 }
 </script>
