@@ -1,61 +1,26 @@
-# koha-plugin-interactiveinventory
+# Koha Plugin: Interactive Inventory
 
-This template should help get you started developing with Vue 3 in Vite.
+This is a plugin for the Koha Library Management System. It allows users to Manage their inventory with an interactive interface for Koha.
 
-## Recommended IDE Setup
+## Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Scan items to update their status in real-time.
+- Export inventory data to CSV.
+- Mark missing items based on user selection.
+- User-friendly interface for scanning items and managing inventory.
 
-## Type Support for `.vue` Imports in TS
+## Installation
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+1. Download the latest release from the repository.
+2. Go to Home › Administration › Manage plugins (under System Administration) in the Koha staff interface.
+3. Use the Upload plugin button to upload the `.kpz` file.
 
-## Customize configuration
+## Usage
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+1. Navigate to Home › Tools › Plugins in the Koha staff interface.
+2. Click on the "Run tool" link in the Actions column for the "Interactive Inventory" plugin.
+3. Follow the instructions on the page to upload a CSV file and select branches.
 
-## Project Setup
+## Development
 
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Run Headed Component Tests with [Cypress Component Testing](https://on.cypress.io/component)
-
-```sh
-npm run test:unit:dev # or `npm run test:unit` for headless testing
-```
-
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run test:e2e:dev
-```
-
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
-
-```sh
-npm run build
-npm run test:e2e
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+This plugin was developed and maintained by PTFS-Europe. It is compatible with Koha version 21.11.00.000 and above.

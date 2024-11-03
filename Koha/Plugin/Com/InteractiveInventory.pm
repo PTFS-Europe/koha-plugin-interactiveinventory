@@ -19,7 +19,7 @@ use C4::Items  qw( GetItemsForInventory );
 use Koha::Items;
 use Koha::ItemTypes;
 
-our $VERSION = 0.0;
+our $VERSION = 0.1;
 
 our $metadata = {
     name            => 'Interactive Inventory',
