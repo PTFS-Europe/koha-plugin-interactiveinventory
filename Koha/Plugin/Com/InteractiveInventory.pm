@@ -32,8 +32,6 @@ our $metadata = {
     description     => 'Interactive Inventory plugin for Koha.',
 };
 
-# our $logger = Koha::Logger->get( { interface => 'intranet', category => 'InteractiveInventory'} );
-
 sub new {
     my ( $class, $args ) = @_;
 
@@ -69,18 +67,6 @@ sub tool {
     output_html_with_http_headers $cgi, $cookie, $template->output;
 }
 
-# sub tool {
-#   my ( $self, $args ) = @_;
-
-#   my $cgi = $self->{'cgi'};
-
-#   unless ( $cgi->param('session') ) {
-#     $self->tool_start();
-#   } else {
-#     $self->tool_session();
-#   }
-
-# }
 
 sub tool_start {
     my ( $self, $args ) = @_;
@@ -118,17 +104,8 @@ sub get_item_data {
 
 sub lookup_item_by_barcode {
     my ($barcode) = @_;
-    warn "Looking up item data for barcode: $barcode";
-
     my $item = Koha::Items->find( { barcode => $barcode } );
-
     my $item_data = $item->{_result}->{_column_data};
-    warn Dumper($item_data);
-
-    # # Ensure $item_data is a hash reference
-    # unless ( ref $item_data eq 'HASH' ) {
-    #     die "Expected a hash reference but got: " . ref($item_data);
-    # }
 
     return $item_data;
 }
@@ -160,36 +137,6 @@ sub start_session {
     my @selectedItypes = map { "'$_'" } @{ $session_data->{'selectedItypes'} };
     my $selectedbranchcode = $session_data->{'selectedLibraryId'};
 
-    # Log all variables
-    warn "minlocation: $minLocation";
-    warn "maxLocation: $maxLocation";
-    warn "locationLoop: $locationLoop";
-    warn "branchLoop: $branchLoop";
-    warn "dateLastSeen: $dateLastSeen";
-    warn "ccode: $ccode";
-    warn "classSource: $classSource";
-    warn "selectedStatuses: $selectedStatuses";
-    warn "ignoreIssued: $ignoreIssued";
-    warn "ignoreWaitingHolds: $ignoreWaitingHolds";
-    warn "selectedItypes: " . join( ", ", @selectedItypes );
-    warn "selectedbranchcode $selectedbranchcode";
-
-    # my ( $location_data, $iTotalRecords ) = GetItemsForInventory(
-    #     {
-    #         minlocation  => $minlocation,
-    #         maxlocation  => $maxLocation,
-    #         class_source => $classSource,
-    #         location     => $locationLoop,
-    #         ignoreissued => $ignoreIssued,
-    #         datelastseen => $dateLastSeen,
-    #         branchcode   => $branchLoop,
-    #         branch       => 'homebranch',
-    #         offset       => 0,
-    #         statushash   => 0,
-    #         ccode        => $ccode,
-    #         itemtypes    => \@selectedItypes,
-    #     }
-    # );
     my ( $rightPlaceList ) = GetItemsForInventory(
         {
             minlocation  => $minLocation,
