@@ -77,14 +77,30 @@ export default {
   },
   methods: {
     async endSession() {
-      if (this.exportToCSV) {
-        // Logic to export data to CSV
-        await this.exportDataToCSV();
-      }
-      // Logic to end the session
-      this.showEndSessionModal = false;
-      // Additional session ending logic
-    },
+    if (this.exportToCSV) {
+      // Logic to export data to CSV
+      await this.exportDataToCSV();
+    }
+
+    // Identify items in the expected list that have not been scanned
+    const expectedBarcodesSet = new Set(this.sessionData.response_data.location_data.map(item => item.barcode));
+    const scannedBarcodesSet = new Set(this.items.map(item => item.external_id));
+    const missingItems = this.sessionData.response_data.location_data.filter(item => !scannedBarcodesSet.has(item.barcode));
+
+    // Mark missing items
+    const itemsToUpdate = missingItems.map(item => ({
+      barcode: item.barcode,
+      fields: { itemlost: 3 }
+    }));
+
+    if (itemsToUpdate.length > 0) {
+      await this.updateItemStatus(itemsToUpdate);
+    }
+
+    // Logic to end the session
+    this.showEndSessionModal = false;
+    // Additional session ending logic
+  },
     async fetchAuthorizedValues(category) {
       const response = await fetch(`/api/v1/authorised_value_categories/${category}/authorised_values`, {
         method: 'GET',
