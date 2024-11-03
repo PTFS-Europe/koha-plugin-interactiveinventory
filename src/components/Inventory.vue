@@ -33,9 +33,13 @@
         <span @click="showEndSessionModal = false" class="close">&times;</span>
         <h2>End Session</h2>
         <p v-if="uniqueBarcodesCount <= expectedUniqueBarcodes">Scanned {{ uniqueBarcodesCount }} unique barcodes of an expected {{ expectedUniqueBarcodes }} are you sure you want to end the session?</p>
-        <label>
-          <input type="checkbox" id="exportToCSV" v-model="exportToCSV"> Export to CSV
-        </label>
+        <div class="modal-checkboxes">
+          <input type="checkbox" id="exportToCSV" v-model="exportToCSV"> Export to CSV </input>
+        </div>
+        <div class="modal-checkboxes">
+          <input type="checkbox" v-model="markMissingItems" id="mark-missing-items"> Mark "loststatus" as missing for any expected items not scanned </input>
+        </div>
+        <span v-if="markMissingItems" style="color: red;">(This can take a while for large numbers of missing items)</span>
         <button @click="endSession" class="end-session-modal-button">End Session</button>
       </div>
     </div>
@@ -73,6 +77,7 @@ export default {
       biblioWithHighestCallNumber: '',
       showEndSessionModal: false,
       exportToCSV: false,
+      markMissingItems: false,
     };
   },
   methods: {
@@ -82,25 +87,27 @@ export default {
       await this.exportDataToCSV();
     }
 
-    // Identify items in the expected list that have not been scanned
-    const expectedBarcodesSet = new Set(this.sessionData.response_data.location_data.map(item => item.barcode));
-    const scannedBarcodesSet = new Set(this.items.map(item => item.external_id));
-    const missingItems = this.sessionData.response_data.location_data.filter(item => !scannedBarcodesSet.has(item.barcode));
+    if (this.markMissingItems) {
+      // Identify items in the expected list that have not been scanned
+      const expectedBarcodesSet = new Set(this.sessionData.response_data.location_data.map(item => item.barcode));
+      const scannedBarcodesSet = new Set(this.items.map(item => item.external_id));
+      const missingItems = this.sessionData.response_data.location_data.filter(item => !scannedBarcodesSet.has(item.barcode));
 
-    // Mark missing items
-    const itemsToUpdate = missingItems.map(item => ({
-      barcode: item.barcode,
-      fields: { itemlost: 3 }
-    }));
+      // Mark missing items
+      const itemsToUpdate = missingItems.map(item => ({
+        barcode: item.barcode,
+        fields: { itemlost: 4 }
+      }));
 
-    if (itemsToUpdate.length > 0) {
-      await this.updateItemStatus(itemsToUpdate);
+      if (itemsToUpdate.length > 0) {
+        await this.updateItemStatus(itemsToUpdate);
+      }
     }
 
     // Logic to end the session
     this.showEndSessionModal = false;
     // Additional session ending logic
-  },
+    },
     async fetchAuthorizedValues(category) {
       const response = await fetch(`/api/v1/authorised_value_categories/${category}/authorised_values`, {
         method: 'GET',
@@ -507,4 +514,20 @@ label {
 .end-session-modal-button:hover {
   background-color: #d32f2f;
 }
+
+.modal-checkboxes {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-checkboxes input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.modal-checkboxes label {
+  flex: 1;
+  word-wrap: break-word;
+}
+
 </style>
