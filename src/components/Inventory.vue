@@ -142,13 +142,13 @@ export default {
         var fieldsToAmend = {};
 
         if (this.sessionData.inventoryDate > combinedData.last_seen_date)
-           fieldsToAmend["datelastseen"] = this.sessionData.inventoryDate;
+          fieldsToAmend["datelastseen"] = this.sessionData.inventoryDate;
 
         // If set to compare barcodes, check if the scanned barcode is in the expected list.
         // If not, show an alert and return.
         const isInRightPlaceList = this.sessionData.response_data.right_place_list.some(item => item.barcode === combinedData.external_id);
         if (this.sessionData.compareBarcodes && !isInRightPlaceList) {
-        combinedData.wrongPlace = true; // Flag the item as in the wrong place
+          combinedData.wrongPlace = true; // Flag the item as in the wrong place
         }
 
         if (combinedData.checked_out_date && !this.sessionData.doNotCheckIn){
@@ -188,10 +188,10 @@ export default {
           isExpanded: index === 0 // Only expand the first item
         }));
 
-        // Update the item status
-        if (Object.keys(fieldsToAmend).length > 0){
-          await this.updateItemStatus(combinedData.external_id, fieldsToAmend);
-        }
+      // Update the item status
+      if (Object.keys(fieldsToAmend).length > 0) {
+        await this.updateItemStatus([{ barcode: combinedData.external_id, fields: fieldsToAmend }]);
+      }
 
         // Clear the barcode input and focus on it
         this.barcode = '';
@@ -223,30 +223,30 @@ export default {
         EventBus.emit('message', { text: `Error checking in item: ${error.message}`, type: 'error' });
       }
     },
-    async updateItemStatus(barcode, fields = {}) {
-      try {
-        const response = await fetch(
-          `/api/v1/contrib/interactiveinventory/item/fields`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              barcode: barcode,
-              fields: fields
-            })
-          }
-        );
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+  async updateItemStatus(items = []) {
+    try {
+      console.log('Updating item statuses:', items);
+      const response = await fetch(
+        `/api/v1/contrib/interactiveinventory/item/fields`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            items: items
+          })
         }
-        const data = await response.json();
-        EventBus.emit('message', { text: 'Item statuses updated successfully', type: 'status' });
-      } catch (error) {
-        EventBus.emit('message', { text: 'Error updating item statuses', type: 'error' });
+      );
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    },
+      const data = await response.json();
+      EventBus.emit('message', { text: 'Item statuses updated successfully', type: 'status' });
+    } catch (error) {
+      EventBus.emit('message', { text: `Error updating item statuses: ${error.message}`, type: 'error' });
+    }
+  },
     async initiateInventorySession(sessionData) {
       this.sessionData = sessionData;
       this.sessionStarted = true;

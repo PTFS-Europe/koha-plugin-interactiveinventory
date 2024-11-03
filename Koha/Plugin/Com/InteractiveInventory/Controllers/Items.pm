@@ -16,48 +16,50 @@ sub modifyItemFields {
     my $data = $self->req->json;
 
     # Validate required fields
-    unless ( $data->{barcode} && $data->{fields} && %{ $data->{fields} } ) {
+    unless ( $data->{items} && @{ $data->{items} } ) {
         return $self->render(
             status => 400,
-            json   => { error => 'Missing barcode or fields to update' }
+            json   => { error => 'Missing items to update' }
         );
     }
 
-    # Find the item by barcode
-    my $item = Koha::Items->find( { barcode => $data->{barcode} } );
-    unless ($item) {
-        return $self->render(
-            status => 404,
-            json   => { error => 'Item not found' }
-        );
-    }
+    my @results;
 
-    # Attempt to update the item fields
-    return try {
-        foreach my $field ( keys %{ $data->{fields} } ) {
-            warn "Updating field: $field";
-            warn "Value: " . $data->{fields}->{$field};
-            warn Dumper( $item->can($field) );
-            warn $item->itemlost;
-            if ( $item->can($field) ) {
-                $item->$field( $data->{fields}->{$field} );
-            } else {
-                die "Invalid field: $field";
-            }
+    foreach my $item_data ( @{ $data->{items} } ) {
+        unless ( $item_data->{barcode} && $item_data->{fields} && %{ $item_data->{fields} } ) {
+            push @results, { barcode => $item_data->{barcode}, status => 400, error => 'Missing barcode or fields to update' };
+            next;
         }
-        $item->store;    # Assuming there's a method to save changes to the item
 
-        $self->render(
-            status => 200,
-            json   => { success => 'Item updated successfully' }
-        );
-    } catch {
-        my $error = $_;
-        $self->render(
-            status => 500,
-            json   => { error => "Failed to update item: $error" }
-        );
-    };
+        # Find the item by barcode
+        my $item = Koha::Items->find( { barcode => $item_data->{barcode} } );
+        unless ($item) {
+            push @results, { barcode => $item_data->{barcode}, status => 404, error => 'Item not found' };
+            next;
+        }
+
+        # Attempt to update the item fields
+        try {
+            foreach my $field ( keys %{ $item_data->{fields} } ) {
+                if ( $item->can($field) ) {
+                    $item->$field( $item_data->{fields}->{$field} );
+                } else {
+                    die "Invalid field: $field";
+                }
+            }
+            $item->store;    # Assuming there's a method to save changes to the item
+
+            push @results, { barcode => $item_data->{barcode}, status => 200, success => 'Item updated successfully' };
+        } catch {
+            my $error = $_;
+            push @results, { barcode => $item_data->{barcode}, status => 500, error => "Failed to update item: $error" };
+        };
+    }
+
+    $self->render(
+        status => 200,
+        json   => { results => \@results }
+    );
 }
 
 sub checkInItem {
